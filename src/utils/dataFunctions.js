@@ -1,7 +1,7 @@
 import Database from '@tauri-apps/plugin-sql';
-import { formatDateForDB } from './helperFunctions'
+import { formatDateForDB } from './helperFunctions';
 
-export class Sleep {
+class Sleep {
     constructor(db) {
         this.db = db;
     }
@@ -27,6 +27,7 @@ export class Sleep {
     }
 
     async updateSleepField(date, sleepData) {
+        const dateString = formatDateForDB(date);
         try {
             await this.db.execute(
                 `UPDATE sleep_records 
@@ -48,21 +49,20 @@ export class Sleep {
                     sleepData.awake_duration,
                     sleepData.sleep_quality_rating,
                     sleepData.notes,
-                    date
+                    dateString
                 ]
             );
 
-            console.log("Updated Data");
+            console.log(`Updated sleep data for ${dateString}`);
         } catch (error) {
-            console.error("Failed To Update Data", error);
+            console.error("Failed to update sleep data:", error);
             throw error;
         }
     }
 
     async deleteSleepRecord(date) {
+        const dateString = formatDateForDB(date);
         try {
-            const dateString = formatDateForDB(date);
-
             await this.db.execute(
                 'DELETE FROM sleep_records WHERE date = $1',
                 [dateString]
@@ -76,20 +76,22 @@ export class Sleep {
     }
 
     async saveSleepRecord(date, sleepData) {
+        console.log("Saving sleep record...");
         try {
             const dateString = formatDateForDB(date);
-            const exists = await this.getSleepRecord(dateString);
+            // Pass the raw date object to avoid double-formatting
+            const exists = await this.getSleepRecord(date);
 
             if (exists) {
-                await this.updateSleepField(date, sleepData)
+                await this.updateSleepField(date, sleepData);
             } else {
                 await this.db.execute(
                     `INSERT INTO sleep_records (
-                    date, sleep_start_time, sleep_end_time,
-                    rem_sleep_duration, deep_sleep_duration,
-                    light_sleep_duration, awake_duration,
-                    sleep_quality_rating, notes
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+                        date, sleep_start_time, sleep_end_time,
+                        rem_sleep_duration, deep_sleep_duration,
+                        light_sleep_duration, awake_duration,
+                        sleep_quality_rating, notes
+                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
                     [
                         dateString,
                         sleepData.sleep_start_time,
@@ -102,13 +104,12 @@ export class Sleep {
                         sleepData.notes
                     ]
                 );
+                console.log(`New sleep record inserted for ${dateString}`);
             }
-            console.log(`Sleep record saved for ${dateString}`);
         } catch (error) {
             console.error('Failed to save sleep record:', error);
             throw error;
         }
-
     }
 
     getDefaultSleepRecord() {
@@ -123,4 +124,13 @@ export class Sleep {
             notes: ''
         };
     }
+}
+
+let sleepInstance = null;
+
+export async function getSleepService() {
+    if (!sleepInstance) {
+        sleepInstance = await Sleep.create();
+    }
+    return sleepInstance;
 }
