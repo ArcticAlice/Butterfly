@@ -7,7 +7,7 @@ class Sleep {
     }
 
     static async create() {
-        const db = await Database.load('sqlite:butterflyTemp.db');
+        const db = await Database.load('sqlite:butterfly.db');
         return new Sleep(db);
     }
 
