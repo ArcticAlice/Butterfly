@@ -1,0 +1,627 @@
+import React, { useState, useRef, useEffect } from 'react';
+import PageHeader from '../components/PageHeader';
+import DateNavigator from '../components/DateNavigator';
+import NotesSection from '../components/NotesSection';
+import Gauge from '../assets/Guage';
+import Pencil from '../assets/Pencil';
+import { colors, typography, spacing } from '../styles/theme';
+import { Sleep } from '../utils/dataFunctions';
+import { formatTime } from '../utils/helperFunctions';
+
+function SleepPage({ onBack }) {
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [saveStatus, setSaveStatus] = useState('idle');
+    const [loading, setLoading] = useState(true);
+    const [formData, setFormData] = useState(() => new Sleep().getDefaultSleepRecord());
+    const [editingFields, setEditingFields] = useState({});
+    const [tempValues, setTempValues] = useState({});
+    const countRef = useRef(true);
+    const sleepInstanceRef = useRef(null);
+    const saveTimeoutRef = useRef(null);
+    const totalSleepMins = formData.rem_sleep_duration + formData.deep_sleep_duration + formData.light_sleep_duration;
+    const goalMins = 480;
+    const percentage = Math.min((totalSleepMins / goalMins) * 100, 100);
+
+    // Load sleep record from database for current date
+    const loadSleepRecord = async () => {
+        try {
+            setLoading(true);
+
+            // Initialize the persistent SQLite database instance if not present
+            if (!sleepInstanceRef.current) {
+                sleepInstanceRef.current = await Sleep.create();
+            }
+
+            const record = await sleepInstanceRef.current.getSleepRecord(currentDate);
+
+            if (record) {
+                // Load existing record
+                setFormData({
+                    sleep_start_time: record.sleep_start_time || '',
+                    sleep_end_time: record.sleep_end_time || '',
+                    rem_sleep_duration: record.rem_sleep_duration || 0,
+                    deep_sleep_duration: record.deep_sleep_duration || 0,
+                    light_sleep_duration: record.light_sleep_duration || 0,
+                    awake_duration: record.awake_duration || 0,
+                    sleep_quality_rating: record.sleep_quality_rating || '',
+                    notes: record.notes || ''
+                });
+            } else {
+                // No record exists, use defaults
+                setFormData(sleepInstanceRef.current.getDefaultSleepRecord());
+            }
+        } catch (error) {
+            console.error('Failed to load sleep record:', error);
+            const fallbackInstance = sleepInstanceRef.current || new Sleep();
+            setFormData(fallbackInstance.getDefaultSleepRecord());
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Debounced save to database. After 3.5 seconds
+    const debouncedSave = (data, instant) => {
+        // Clear existing timeout
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current);
+        }
+
+        setSaveStatus('saving');
+
+        const time = instant ? 500 : 3500;
+
+        saveTimeoutRef.current = setTimeout(async () => {
+            try {
+                // Failsafe initialization in case a save triggers before load completes
+                if (!sleepInstanceRef.current) {
+                    sleepInstanceRef.current = await Sleep.create();
+                }
+
+                // saveSleepRecord expects the raw Date object to handle formatting internally
+                await sleepInstanceRef.current.saveSleepRecord(currentDate, data);
+                setSaveStatus('saved');
+                setTimeout(() => setSaveStatus('idle'), 1000);
+            } catch (error) {
+                console.error('Failed to save sleep record:', error);
+                setSaveStatus('error');
+                setTimeout(() => setSaveStatus('idle'), 1100);
+            }
+        }, time);
+
+    }
+
+    const startEditing = (field) => {
+        countRef.current = false;
+        setTempValues(prev => ({ ...prev, [field]: formData[field] }));
+        setEditingFields(prev => ({ ...prev, [field]: true }));
+    };
+
+    const saveField = (field, instant = false, directValue = null) => {
+        countRef.current = true;
+
+        const rawValue =
+            directValue !== null ? directValue : tempValues[field];
+
+        const textFields = ['notes', 'sleep_start_time', 'sleep_end_time'];
+
+        const formattedValue = textFields.includes(field) ? rawValue : rawValue === '' ? 0 : Number(rawValue);
+
+        const updatedData = {
+            ...formData,
+            [field]: formattedValue
+        };
+
+        setFormData(updatedData);
+        setEditingFields(prev => ({ ...prev, [field]: false }));
+
+        debouncedSave(updatedData, instant);
+    };
+
+    const handleTempChange = (field, value) => {
+        setTempValues(prev => ({
+            ...prev,
+            [field]: value === '' ? '' : value
+        }));
+    };
+
+    // Saves when user presses return
+    const handleKeyPress = (e, field) => {
+        if (e.key === 'Enter') {
+            saveField(field, true);
+        }
+    };
+
+    const handleNotesChange = (value) => {
+        const updatedData = { ...formData, notes: value };
+        setFormData(updatedData);
+        debouncedSave(updatedData, false);
+    };
+
+    // Load sleep record when date changes
+    useEffect(() => {
+        loadSleepRecord();
+    }, [currentDate]);
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (saveTimeoutRef.current) {
+                clearTimeout(saveTimeoutRef.current);
+            }
+        };
+    }, []);
+
+    if (loading) {
+        return (
+            <div style={styles.container}>
+                <PageHeader onBack={onBack} />
+                <div style={styles.loadingContainer}>
+                    <div style={styles.loadingText}>Loading sleep data...</div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div style={styles.container}>
+            <PageHeader onBack={onBack} />
+            <div style={styles.content}>
+
+                <DateNavigator
+                    currentDate={currentDate}
+                    onPrevious={() =>
+                        setCurrentDate(prev => {
+                            const newDate = new Date(prev);
+                            newDate.setDate(newDate.getDate() - 1);
+                            return newDate;
+                        })
+                    }
+                    onNext={() =>
+                        setCurrentDate(prev => {
+                            const newDate = new Date(prev);
+                            newDate.setDate(newDate.getDate() + 1);
+                            return newDate;
+                        })
+                    }
+                    move={countRef.current}
+                />
+
+                <div style={styles.mainGrid}>
+
+                    {/* Left Column */}
+                    <div style={styles.summaryCard}>
+                        <div style={styles.gaugeWrapper}>
+                            <Gauge
+                                percentage={percentage}
+                                totalValue={totalSleepMins}
+                                goalText="GOAL: 8h 00m"
+                            />
+
+                            <div style={styles.guageText}>
+                                <p style={{ margin: 0, fontSize: '18px', fontWeight: '700' }}>
+                                    {formatTime(totalSleepMins)}
+                                </p>
+
+                                <p
+                                    style={{
+                                        margin: 0,
+                                        marginTop: '8px',
+                                        fontSize: '12px',
+                                    }}
+                                >
+                                    GOAL: 8h 00M
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* <div style={styles.qualityPill}>
+                            Sleep Quality: {formData.sleep_quality_rating || 'Not Set'}
+                        </div> */}
+                    </div>
+
+                    {/* Right Column */}
+                    <div style={styles.detailsColumn}>
+
+                        {/* Sleep Schedule Section */}
+                        <div style={styles.sectionCard}>
+                            <h3 style={styles.sectionHeader}>Sleep Schedule</h3>
+
+                            <div style={styles.labelGrid}>
+                                <label style={styles.fieldLabel}>Went To Bed</label>
+                                <label style={styles.fieldLabel}>Woke Up</label>
+                            </div>
+
+                            <div style={styles.valuesGrid}>
+                                <div style={{
+                                    ...styles.fieldValueRow,
+                                    ...(editingFields.sleep_start_time)
+                                }}>
+                                    {editingFields.sleep_start_time ? (
+                                        <input
+                                            type="text"
+                                            value={tempValues.sleep_start_time}
+                                            onChange={(e) => handleTempChange('sleep_start_time', e.target.value)}
+                                            onKeyPress={(e) => handleKeyPress(e, 'sleep_start_time')}
+                                            style={styles.timeInputFull}
+                                            autoFocus
+                                            onBlur={() => saveField('sleep_start_time', true)}
+                                        />
+                                    ) : (
+                                        <span style={styles.fieldValueText}>
+                                            {formData.sleep_start_time || '--:-- --'}
+                                        </span>
+                                    )}
+                                    <div onClick={() => editingFields.sleep_start_time ? saveField('sleep_start_time', true) : startEditing('sleep_start_time')}>
+                                        <Pencil width='20px' height='20px' color={colors.secondary} />
+                                    </div>
+                                </div>
+
+                                <div style={{
+                                    ...styles.fieldValueRow,
+                                    ...(editingFields.sleep_end_time)
+                                }}>
+                                    {editingFields.sleep_end_time ? (
+                                        <input
+                                            type="text"
+                                            value={tempValues.sleep_end_time}
+                                            onChange={(e) => handleTempChange('sleep_end_time', e.target.value)}
+                                            onKeyPress={(e) => handleKeyPress(e, 'sleep_end_time')}
+                                            style={styles.timeInputFull}
+                                            autoFocus
+                                            onBlur={() => saveField('sleep_end_time', true)}
+                                        />
+                                    ) : (
+                                        <span style={styles.fieldValueText}>
+                                            {formData.sleep_end_time || '--:-- --'}
+                                        </span>
+                                    )}
+                                    <div onClick={() => editingFields.sleep_end_time ? saveField('sleep_end_time', true) : startEditing('sleep_end_time')}>
+                                        <Pencil width='18px' height='18px' color={colors.secondary} />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {/* End of Sleep Schedule Section */}
+
+                        {/* Sleep Stages */}
+                        <div style={styles.sectionCard}>
+                            <h3 style={styles.sectionHeader}>SLEEP STAGES</h3>
+
+                            {/* REM */}
+                            <div style={{
+                                ...styles.stageRow,
+                                ...(editingFields.rem_sleep_duration)
+                            }}>
+                                <div
+                                    style={{
+                                        ...styles.stageIndicator,
+                                        backgroundColor: colors.primary
+                                    }}
+                                ></div>
+
+                                <span style={styles.stageLabel}>REM</span>
+
+                                {editingFields.rem_sleep_duration ? (
+                                    <input
+                                        type="text"
+                                        inputMode="numeric"
+                                        value={tempValues.rem_sleep_duration ?? ''}
+                                        onChange={(e) =>
+                                            handleTempChange('rem_sleep_duration', e.target.value)
+                                        }
+                                        onKeyPress={(e) =>
+                                            handleKeyPress(e, 'rem_sleep_duration')
+                                        }
+                                        style={styles.durationInput}
+                                        autoFocus
+                                        onBlur={() => saveField('rem_sleep_duration', true)}
+                                    />
+                                ) : (
+                                    <span style={styles.stageValue}>
+                                        {formatTime(formData.rem_sleep_duration)}
+                                    </span>
+                                )}
+
+                                <div
+                                    onClick={() =>
+                                        editingFields.rem_sleep_duration
+                                            ? saveField('rem_sleep_duration', true)
+                                            : startEditing('rem_sleep_duration')
+                                    }
+                                >
+                                    <Pencil width='15px' height='15px' />
+                                </div>
+                            </div>
+
+                            {/* Deep Sleep */}
+                            <div style={{
+                                ...styles.stageRow,
+                                ...(editingFields.deep_sleep_duration)
+                            }}>
+                                <div
+                                    style={{
+                                        ...styles.stageIndicator,
+                                        backgroundColor: colors.secondary
+                                    }}
+                                ></div>
+
+                                <span style={styles.stageLabel}>Deep Sleep</span>
+
+                                {editingFields.deep_sleep_duration ? (
+                                    <input
+                                        type="text"
+                                        inputMode="numeric"
+                                        value={tempValues.deep_sleep_duration ?? ''}
+                                        onChange={(e) =>
+                                            handleTempChange('deep_sleep_duration', e.target.value)
+                                        }
+                                        onKeyPress={(e) =>
+                                            handleKeyPress(e, 'deep_sleep_duration')
+                                        }
+                                        style={styles.durationInput}
+                                        autoFocus
+                                        onBlur={() => saveField('deep_sleep_duration', true)}
+                                    />
+                                ) : (
+                                    <span style={styles.stageValue}>
+                                        {formatTime(formData.deep_sleep_duration)}
+                                    </span>
+                                )}
+
+                                <div
+                                    onClick={() =>
+                                        editingFields.deep_sleep_duration
+                                            ? saveField('deep_sleep_duration', true)
+                                            : startEditing('deep_sleep_duration')
+                                    }
+                                >
+                                    <Pencil width='15px' height='15px' />
+                                </div>
+                            </div>
+
+                            {/* Light Sleep */}
+                            <div style={{
+                                ...styles.stageRow,
+                                ...(editingFields.light_sleep_duration)
+                            }}>
+                                <div
+                                    style={{
+                                        ...styles.stageIndicator,
+                                        backgroundColor: colors.accent
+                                    }}
+                                ></div>
+
+                                <span style={styles.stageLabel}>Light Sleep</span>
+
+                                {editingFields.light_sleep_duration ? (
+                                    <input
+                                        type="text"
+                                        inputMode="numeric"
+                                        value={tempValues.light_sleep_duration ?? ''}
+                                        onChange={(e) =>
+                                            handleTempChange('light_sleep_duration', e.target.value)
+                                        }
+                                        onKeyPress={(e) =>
+                                            handleKeyPress(e, 'light_sleep_duration')
+                                        }
+                                        style={styles.durationInput}
+                                        autoFocus
+                                        onBlur={() => saveField('light_sleep_duration', true)}
+                                    />
+                                ) : (
+                                    <span style={styles.stageValue}>
+                                        {formatTime(formData.light_sleep_duration)}
+                                    </span>
+                                )}
+
+                                <div
+                                    onClick={() =>
+                                        editingFields.light_sleep_duration
+                                            ? saveField('light_sleep_duration', true)
+                                            : startEditing('light_sleep_duration')
+                                    }
+                                >
+                                    <Pencil width='15px' height='15px' />
+                                </div>
+                            </div>
+
+                            {/* Awake */}
+                            <div style={{
+                                ...styles.stageRow,
+                                ...(editingFields.awake_duration)
+                            }}>
+                                <div
+                                    style={{
+                                        ...styles.stageIndicator,
+                                        backgroundColor: colors.primarySoft
+                                    }}
+                                ></div>
+
+                                <span style={styles.stageLabel}>Awake</span>
+
+                                {editingFields.awake_duration ? (
+                                    <input
+                                        type="text"
+                                        inputMode="numeric"
+                                        value={tempValues.awake_duration ?? ''}
+                                        onChange={(e) =>
+                                            handleTempChange('awake_duration', e.target.value)
+                                        }
+                                        onKeyPress={(e) =>
+                                            handleKeyPress(e, 'awake_duration')
+                                        }
+                                        style={styles.durationInput}
+                                        autoFocus
+                                        onBlur={() => saveField('awake_duration', true)}
+                                    />
+                                ) : (
+                                    <span style={styles.stageValue}>
+                                        {formatTime(formData.awake_duration)}
+                                    </span>
+                                )}
+
+                                <div
+                                    onClick={() =>
+                                        editingFields.awake_duration
+                                            ? saveField('awake_duration', true)
+                                            : startEditing('awake_duration')
+                                    }
+                                >
+                                    <Pencil width='15px' height='15px' />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <NotesSection
+                    value={formData.notes}
+                    onChange={handleNotesChange}
+                    label="Dream Journal & Notes"
+                    saveStatus={saveStatus}
+                    saveField={saveField}
+                />
+            </div>
+        </div>
+    );
+}
+
+const styles = {
+    container: {
+        height: '100vh',
+        width: '100vw',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+    },
+    content: {
+        width: '60%',
+        height: '93%',
+        position: 'absolute',
+        bottom: '0',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        display: 'grid',
+        gridTemplateRows: '.1fr 1fr .8fr',
+        gap: '2%',
+        boxSizing: 'border-box',
+        paddingTop: '2%',
+    },
+    mainGrid: {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1.5fr',
+        gap: spacing.xl,
+        width: '100%',
+    },
+    // Styles for left column
+    summaryCard: {
+        backgroundColor: colors.card,
+        borderRadius: '24px',
+        padding: spacing.xl,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxSizing: 'border-box',
+        marginBottom: '10%',
+        marginTop: '10%'
+    },
+    gaugeWrapper: {
+        position: 'relative',
+        width: 220,
+        height: 220,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    guageText: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1,
+        textAlign: 'center',
+        pointerEvents: 'none',
+    },
+    qualityPill: {
+        backgroundColor: colors.card,
+        color: colors.primary,
+        padding: '8px 24px',
+        borderRadius: '20px',
+        fontSize: '12px',
+        fontWeight: 'bold'
+    },
+    // styles for right column
+    detailsColumn: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: spacing.lg
+    },
+    // General styles for sections in right column
+    sectionCard: {
+        backgroundColor: colors.card,
+        borderRadius: '24px',
+        padding: '32px'
+    },
+    sectionHeader: {
+        fontSize: '18px',
+        letterSpacing: '1px',
+        marginBottom: '16px',
+        color: colors.textPrimary,
+        fontWeight: '900',
+    },
+    // styles for sleep schedule
+    labelGrid: {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: spacing.md,
+        marginBottom: '6px'
+    },
+    fieldLabel: {
+        fontSize: '12px',
+        color: colors.textSecondary,
+        letterSpacing: '0.5px'
+    },
+    valuesGrid: {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: spacing.md
+    },
+    fieldValueRow: {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+        minHeight: '24px',
+    },
+    timeInputFull: {
+        width: '160px',
+        fontSize: '18px',
+        fontWeight: '900',
+        border: 'none',
+        outline: 'none',
+        backgroundColor: '#d7e9ff88',
+        color: colors.textPrimary,
+    },
+    fieldValueText: {
+        fontSize: '18px',
+        fontWeight: '900',
+        color: colors.textPrimary,
+    },
+    // styles for sleep stages
+    stageRow: {
+        display: 'flex', alignItems: 'center', backgroundColor: colors.surface,
+        padding: '12px 16px', borderRadius: '12px', marginBottom: spacing.sm
+    },
+    stageIndicator: { width: '4px', height: '24px', borderRadius: '2px', marginRight: spacing.md },
+    stageLabel: { flex: 1, fontSize: '14px', fontWeight: '500' },
+    stageValue: { fontSize: '14px', fontWeight: 'bold', marginRight: spacing.sm },
+    durationInput: {
+        width: '60px', fontSize: '14px', fontWeight: 'bold', border: 'none',
+        outline: 'none', backgroundColor: 'transparent', textAlign: 'right', marginRight: spacing.sm
+    }
+};
+
+export default SleepPage;
