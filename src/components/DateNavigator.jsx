@@ -8,6 +8,16 @@ function DateNavigator({ currentDate, onPrevious, onNext, format = 'long', move 
     useEffect(() => {
         const handleKeyPress = (e) => {
             if (!move) return;
+
+            // Ignore arrow keys when user is typing in input/textarea
+            const activeElement = document.activeElement;
+            if (activeElement && (
+                activeElement.tagName === 'INPUT' ||
+                activeElement.tagName === 'TEXTAREA'
+            )) {
+                return;
+            }
+
             if (e.key === 'ArrowLeft' && onPrevious) {
                 onPrevious();
             } else if (e.key === 'ArrowRight' && onNext) {
@@ -17,7 +27,7 @@ function DateNavigator({ currentDate, onPrevious, onNext, format = 'long', move 
 
         window.addEventListener('keydown', handleKeyPress);
         return () => window.removeEventListener('keydown', handleKeyPress);
-    }, [onPrevious, onNext, move]); // <-- add move
+    }, [onPrevious, onNext, move]);
 
     const formatDate = (date) => {
         const dateObj = typeof date === 'string' ? new Date(date) : date;
