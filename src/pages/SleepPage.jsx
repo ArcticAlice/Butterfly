@@ -20,11 +20,11 @@ function SleepPage({ onBack }) {
     const saveTimeoutRef = useRef(null);
 
     // Safely compute totals with fallback values to prevent NaN render errors
-    const totalSleepMins = 
-        (formData.rem_sleep_duration || 0) + 
-        (formData.deep_sleep_duration || 0) + 
+    const totalSleepMins =
+        (formData.rem_sleep_duration || 0) +
+        (formData.deep_sleep_duration || 0) +
         (formData.light_sleep_duration || 0);
-        
+
     const goalMins = 480;
     const percentage = Math.min((totalSleepMins / goalMins) * 100, 100);
 
@@ -135,7 +135,6 @@ function SleepPage({ onBack }) {
     };
 
     const handleNotesChange = (value) => {
-        countRef.current = false;
         const updatedData = { ...formData, notes: value };
         setFormData(updatedData);
         debouncedSave(updatedData, false);
@@ -152,6 +151,13 @@ function SleepPage({ onBack }) {
             }
         };
     }, []);
+
+    const sleepStages = [
+        { field: 'rem_sleep_duration', label: 'REM', color: colors.primary },
+        { field: 'deep_sleep_duration', label: 'Deep Sleep', color: colors.secondary },
+        { field: 'light_sleep_duration', label: 'Light Sleep', color: colors.accent },
+        { field: 'awake_duration', label: 'Awake', color: colors.primarySoft }
+    ];
 
     if (loading) {
         return (
@@ -268,97 +274,29 @@ function SleepPage({ onBack }) {
                         <div style={styles.sectionCard}>
                             <h3 style={styles.sectionHeader}>SLEEP STAGES</h3>
 
-                            {/* REM */}
-                            <div style={{ ...styles.stageRow, ...(editingFields.rem_sleep_duration) }}>
-                                <div style={{ ...styles.stageIndicator, backgroundColor: colors.primary }}></div>
-                                <span style={styles.stageLabel}>REM</span>
-                                {editingFields.rem_sleep_duration ? (
-                                    <input
-                                        type="text"
-                                        inputMode="numeric"
-                                        value={tempValues.rem_sleep_duration ?? ''}
-                                        onChange={(e) => handleTempChange('rem_sleep_duration', e.target.value)}
-                                        onKeyPress={(e) => handleKeyPress(e, 'rem_sleep_duration')}
-                                        style={styles.durationInput}
-                                        autoFocus
-                                        onBlur={() => saveField('rem_sleep_duration', true)}
-                                    />
-                                ) : (
-                                    <span style={styles.stageValue}>{formatTime(formData.rem_sleep_duration)}</span>
-                                )}
-                                <div onClick={() => editingFields.rem_sleep_duration ? saveField('rem_sleep_duration', true) : startEditing('rem_sleep_duration')}>
-                                    <Pencil width='15px' height='15px' />
+                            {sleepStages.map(({ field, label, color }) => (
+                                <div key={field} style={{ ...styles.stageRow, ...(editingFields[field]) }}>
+                                    <div style={{ ...styles.stageIndicator, backgroundColor: color }}></div>
+                                    <span style={styles.stageLabel}>{label}</span>
+                                    {editingFields[field] ? (
+                                        <input
+                                            type="text"
+                                            inputMode="numeric"
+                                            value={tempValues[field] ?? ''}
+                                            onChange={(e) => handleTempChange(field, e.target.value)}
+                                            onKeyPress={(e) => handleKeyPress(e, field)}
+                                            style={styles.durationInput}
+                                            autoFocus
+                                            onBlur={() => saveField(field, true)}
+                                        />
+                                    ) : (
+                                        <span style={styles.stageValue}>{formatTime(formData[field])}</span>
+                                    )}
+                                    <div onClick={() => editingFields[field] ? saveField(field, true) : startEditing(field)}>
+                                        <Pencil width='15px' height='15px' />
+                                    </div>
                                 </div>
-                            </div>
-
-                            {/* Deep Sleep */}
-                            <div style={{ ...styles.stageRow, ...(editingFields.deep_sleep_duration) }}>
-                                <div style={{ ...styles.stageIndicator, backgroundColor: colors.secondary }}></div>
-                                <span style={styles.stageLabel}>Deep Sleep</span>
-                                {editingFields.deep_sleep_duration ? (
-                                    <input
-                                        type="text"
-                                        inputMode="numeric"
-                                        value={tempValues.deep_sleep_duration ?? ''}
-                                        onChange={(e) => handleTempChange('deep_sleep_duration', e.target.value)}
-                                        onKeyPress={(e) => handleKeyPress(e, 'deep_sleep_duration')}
-                                        style={styles.durationInput}
-                                        autoFocus
-                                        onBlur={() => saveField('deep_sleep_duration', true)}
-                                    />
-                                ) : (
-                                    <span style={styles.stageValue}>{formatTime(formData.deep_sleep_duration)}</span>
-                                )}
-                                <div onClick={() => editingFields.deep_sleep_duration ? saveField('deep_sleep_duration', true) : startEditing('deep_sleep_duration')}>
-                                    <Pencil width='15px' height='15px' />
-                                </div>
-                            </div>
-
-                            {/* Light Sleep */}
-                            <div style={{ ...styles.stageRow, ...(editingFields.light_sleep_duration) }}>
-                                <div style={{ ...styles.stageIndicator, backgroundColor: colors.accent }}></div>
-                                <span style={styles.stageLabel}>Light Sleep</span>
-                                {editingFields.light_sleep_duration ? (
-                                    <input
-                                        type="text"
-                                        inputMode="numeric"
-                                        value={tempValues.light_sleep_duration ?? ''}
-                                        onChange={(e) => handleTempChange('light_sleep_duration', e.target.value)}
-                                        onKeyPress={(e) => handleKeyPress(e, 'light_sleep_duration')}
-                                        style={styles.durationInput}
-                                        autoFocus
-                                        onBlur={() => saveField('light_sleep_duration', true)}
-                                    />
-                                ) : (
-                                    <span style={styles.stageValue}>{formatTime(formData.light_sleep_duration)}</span>
-                                )}
-                                <div onClick={() => editingFields.light_sleep_duration ? saveField('light_sleep_duration', true) : startEditing('light_sleep_duration')}>
-                                    <Pencil width='15px' height='15px' />
-                                </div>
-                            </div>
-
-                            {/* Awake */}
-                            <div style={{ ...styles.stageRow, ...(editingFields.awake_duration) }}>
-                                <div style={{ ...styles.stageIndicator, backgroundColor: colors.primarySoft }}></div>
-                                <span style={styles.stageLabel}>Awake</span>
-                                {editingFields.awake_duration ? (
-                                    <input
-                                        type="text"
-                                        inputMode="numeric"
-                                        value={tempValues.awake_duration ?? ''}
-                                        onChange={(e) => handleTempChange('awake_duration', e.target.value)}
-                                        onKeyPress={(e) => handleKeyPress(e, 'awake_duration')}
-                                        style={styles.durationInput}
-                                        autoFocus
-                                        onBlur={() => saveField('awake_duration', true)}
-                                    />
-                                ) : (
-                                    <span style={styles.stageValue}>{formatTime(formData.awake_duration)}</span>
-                                )}
-                                <div onClick={() => editingFields.awake_duration ? saveField('awake_duration', true) : startEditing('awake_duration')}>
-                                    <Pencil width='15px' height='15px' />
-                                </div>
-                            </div>
+                            ))}
                         </div>
                     </div>
                 </div>
