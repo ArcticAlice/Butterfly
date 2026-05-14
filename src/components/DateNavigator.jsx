@@ -3,11 +3,10 @@ import Left from '../assets/Left.jsx'
 import Right from '../assets/Right.jsx'
 import { colors, typography, spacing } from '../styles/theme';
 
-function DateNavigator({ currentDate, onPrevious, onNext, format = 'long', move = true }) {
+function DateNavigator({ currentDate, onPrevious, onNext, format = 'long' }) {
     // ========== LOGIC SECTION ==========
     useEffect(() => {
         const handleKeyPress = (e) => {
-            if (!move) return;
 
             // Ignore arrow keys when user is typing in input/textarea
             const activeElement = document.activeElement;
@@ -27,7 +26,7 @@ function DateNavigator({ currentDate, onPrevious, onNext, format = 'long', move 
 
         window.addEventListener('keydown', handleKeyPress);
         return () => window.removeEventListener('keydown', handleKeyPress);
-    }, [onPrevious, onNext, move]);
+    }, [onPrevious, onNext]);
 
     const formatDate = (date) => {
         const dateObj = typeof date === 'string' ? new Date(date) : date;
