@@ -16,7 +16,6 @@ function SleepPage({ onBack }) {
     const [formData, setFormData] = useState({});
     const [editingFields, setEditingFields] = useState({});
     const [tempValues, setTempValues] = useState({});
-    const countRef = useRef(true);
     const saveTimeoutRef = useRef(null);
 
     // Safely compute totals with fallback values to prevent NaN render errors
@@ -100,13 +99,11 @@ function SleepPage({ onBack }) {
     };
 
     const startEditing = (field) => {
-        countRef.current = false;
         setTempValues(prev => ({ ...prev, [field]: formData[field] }));
         setEditingFields(prev => ({ ...prev, [field]: true }));
     };
 
     const saveField = (field, instant = false, directValue = null) => {
-        countRef.current = true;
         const rawValue = directValue !== null ? directValue : tempValues[field];
         const textFields = ['notes', 'sleep_start_time', 'sleep_end_time'];
         const formattedValue = textFields.includes(field) ? rawValue : rawValue === '' ? 0 : Number(rawValue);
@@ -190,7 +187,6 @@ function SleepPage({ onBack }) {
                             return newDate;
                         })
                     }
-                    move={countRef.current}
                 />
 
                 <div style={styles.mainGrid}>
