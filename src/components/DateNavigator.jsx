@@ -4,6 +4,10 @@ import Right from '../assets/Right.jsx'
 import { colors, typography, spacing } from '../styles/theme';
 
 function DateNavigator({ currentDate, onPrevious, onNext, format = 'long' }) {
+
+    const weekday = currentDate.toLocaleDateString('en-US', {
+        weekday: 'long'
+    });
     // ========== LOGIC SECTION ==========
     useEffect(() => {
         const handleKeyPress = (e) => {
@@ -54,7 +58,7 @@ function DateNavigator({ currentDate, onPrevious, onNext, format = 'long' }) {
             </button>
 
             <div style={styles.dateDisplay}>
-                {formatDate(currentDate)}
+                {`${weekday}, ${formatDate(currentDate)}`}
             </div>
 
             <button
