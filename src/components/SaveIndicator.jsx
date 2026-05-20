@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { colors, typography, spacing } from '../styles/theme';
+import { colors, typography, spacing } from '../utils/theme';
 
 function SaveIndicator({ status }) {
     // ========== LOGIC SECTION ==========
@@ -39,13 +39,13 @@ function SaveIndicator({ status }) {
     const getColor = () => {
         switch (status) {
             case 'saving':
-                return colors.textSecondary;
+                return colors.first;
             case 'saved':
-                return colors.success;
+                return colors.first;
             case 'error':
-                return colors.error;
+                return colors.first;
             default:
-                return colors.textSecondary;
+                return colors.first;
         }
     };
 

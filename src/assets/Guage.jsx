@@ -1,10 +1,10 @@
-import { colors } from "../styles/theme";
+import { colors } from "../utils/theme";
 
 function Gauge({
     width = 220,
     height = 220,
     percentage = 0,
-    primaryColor = colors.primary,
+    primaryColor = colors.third,
     totalValue = 0,
     goalText = "",
     ...props

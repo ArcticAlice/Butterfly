@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import Left from '../assets/Left.jsx'
 import Right from '../assets/Right.jsx'
-import { colors, typography, spacing } from '../styles/theme';
+import { colors, typography, spacing } from '../utils/theme.js';
 
 function DateNavigator({ currentDate, onPrevious, onNext, format = 'long' }) {
 
@@ -49,30 +49,17 @@ function DateNavigator({ currentDate, onPrevious, onNext, format = 'long' }) {
     // ========== RETURN STATEMENT ==========
     return (
         <div style={styles.container}>
-            <button
-                onClick={onPrevious}
-                style={styles.arrowButton}
-                aria-label="Previous day"
-            >
-                <Left />
-            </button>
+            <Left onClick={onPrevious}/>
 
             <div style={styles.dateDisplay}>
                 {`${weekday}, ${formatDate(currentDate)}`}
             </div>
 
-            <button
-                onClick={onNext}
-                style={styles.arrowButton}
-                aria-label="Next day"
-            >
-                <Right />
-            </button>
+            <Right onClick={onNext}/>
         </div>
     );
 }
 
-// ========== STYLES SECTION ==========
 const styles = {
     container: {
         display: 'flex',
@@ -81,24 +68,9 @@ const styles = {
         gap: spacing.lg,
         width: '100%'
     },
-    arrowButton: {
-        backgroundColor: 'transparent',
-        border: 'none',
-        fontSize: '20px',
-        color: colors.textSecondary,
-        cursor: 'pointer',
-        padding: spacing.sm,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        transition: 'color 0.2s',
-        width: '40px',
-        height: '40px',
-        borderRadius: '8px',
-    },
     dateDisplay: {
         ...typography.h3,
-        color: colors.textPrimary,
+        color: colors.first,
         minWidth: '200px',
         textAlign: 'center',
     },

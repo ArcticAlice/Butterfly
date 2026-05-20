@@ -1,5 +1,5 @@
 import React from 'react';
-import { colors, typography, spacing } from '../styles/theme';
+import { colors, typography, spacing } from '../utils/theme.js';
 import Butterfly from '../assets/Butterfly.jsx';
 
 function PageHeader({ title = false, onBack, showBackButton = true }) {
@@ -18,7 +18,7 @@ function PageHeader({ title = false, onBack, showBackButton = true }) {
         <div style={styles.header}>
             <div onClick={handleBackClick} style={styles.leftSection}>
                 <div style={styles.logoContainer} >
-                    <Butterfly width="40px" height="40px" color={colors.primary} />
+                    <Butterfly />
                 </div>
                 <p style={styles.logoText}>Butterfly</p>
             </div>
@@ -60,6 +60,7 @@ const getStyles = (title) => ({
         width: '80%',
         fontSize: spacing.lg,
         cursor: title ? 'default' : 'pointer',
+        color: colors.text,
     },
 });
 

@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import PageHeader from '../components/PageHeader';
 import DateNavigator from '../components/DateNavigator';
 import NotesSection from '../components/NotesSection';
-import { colors } from '../styles/theme';
+import { colors } from '../utils/theme';
 
 function HealthMetricsPage({ onBack }) {
     // ========== LOGIC SECTION ==========

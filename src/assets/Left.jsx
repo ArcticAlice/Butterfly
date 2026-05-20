@@ -1,4 +1,6 @@
-function Left( {width = "50px", height = "50px", color = "#750D37", stroke = "white", strokeWidth = 1, ...props} ) {
+import {colors} from "../utils/theme"
+ 
+function Left( {width = "25px", height = "25px", color = colors.second, stroke = "white", strokeWidth = 1, ...props} ) {
 
     const style = {
         cursor: "pointer"
