@@ -149,10 +149,10 @@ function SleepPage({ onBack }) {
     }, []);
 
     const sleepStages = [
-        { field: 'rem_sleep_duration', label: 'REM', color: colors.primary },
-        { field: 'deep_sleep_duration', label: 'Deep Sleep', color: colors.secondary },
-        { field: 'light_sleep_duration', label: 'Light Sleep', color: colors.accent },
-        { field: 'awake_duration', label: 'Awake', color: colors.primarySoft }
+        { field: 'rem_sleep_duration', label: 'REM', color: colors.first },
+        { field: 'deep_sleep_duration', label: 'Deep Sleep', color: colors.second },
+        { field: 'light_sleep_duration', label: 'Light Sleep', color: colors.third },
+        { field: 'awake_duration', label: 'Awake', color: colors.fourth }
     ];
 
     if (loading) return <div>Loading...</div>;

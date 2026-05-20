@@ -1,19 +1,21 @@
 export const colors = {
-  primary: '#4E6E5D',        
-  primarySoft: '#CFCFCF',    
-
-  secondary: '#01763B',     
-  accent: '#e0c1b3',         
+  first: '#4D5057',        
+  second: '#4E6E5D',    
+  third: '#4DA167',     
+  fourth: '#3BC14A',
+  fifth: '#94A3B8',         
 
 //   background: '#F0F4F9',
   background: '#EFF6FF88',
   card: '#FFFFFF',
 
   textPrimary: 'black',
-  textSecondary: '#6B7280',
+  textSecondary: '#CFCFCF',
 
   border: '#E5E7EB'
 };
+
+// primary, primarySoft, secondary, accent, background, card, textPrimary, textSecondary, border
 
 // ========== TYPOGRAPHY ==========
 export const typography = {

@@ -188,7 +188,7 @@ function DietPage({ onBack }) {
                                     <span style={{ fontSize: '24px', fontWeight: 'bold', color: colors.primary }}>
                                         {totalFoodCal}
                                     </span>
-                                    <span style={{ fontSize: '12px', color: '#94A3B8' }}>Calories</span>
+                                    <span style={{ fontSize: '12px', color: colors.fifth }}>Calories</span>
                                 </p>
                             </div>
                             <div style={styles.goalFooter}>
@@ -199,7 +199,7 @@ function DietPage({ onBack }) {
                                 <div style={styles.footerDivider} />
                                 <div style={styles.footerItem}>
                                     <span style={styles.footerLabel}>REMAINING</span>
-                                    <span style={{ ...styles.footerValue, color: remaining < 0 ? colors.error : colors.secondary }}>
+                                    <span style={{ ...styles.footerValue, color: remaining < 0 ? colors.first : colors.third }}>
                                         {remaining} <small>kcal</small>
                                     </span>
                                 </div>
@@ -207,15 +207,15 @@ function DietPage({ onBack }) {
                         </div>
 
                         <div style={styles.macroRow}>
-                            <div style={{ ...styles.macroCard, borderTop: `3px solid ${colors.secondary}` }}>
+                            <div style={{ ...styles.macroCard, borderTop: `3px solid ${colors.first}` }}>
                                 <span style={styles.macroLabel}>PROTEIN</span>
                                 <span style={styles.macroValue}>?</span>
                             </div>
-                            <div style={{ ...styles.macroCard, borderTop: `3px solid ${colors.accent}` }}>
+                            <div style={{ ...styles.macroCard, borderTop: `3px solid ${colors.second}` }}>
                                 <span style={styles.macroLabel}>CARBS</span>
                                 <span style={styles.macroValue}>?</span>
                             </div>
-                            <div style={{ ...styles.macroCard, borderTop: `3px solid ${colors.primarySoft}` }}>
+                            <div style={{ ...styles.macroCard, borderTop: `3px solid ${colors.third}` }}>
                                 <span style={styles.macroLabel}>FAT</span>
                                 <span style={styles.macroValue}>?</span>
                             </div>
@@ -327,19 +327,20 @@ const styles = {
         zIndex: 1,
         textAlign: 'center',
         pointerEvents: 'none',
+        color: colors.first,
     },
-    cardHeader: { fontSize: '16px', fontWeight: 'bold', color: '#1E293B', margin: 0, textAlign: 'left' },
+    cardHeader: { fontSize: '16px', fontWeight: 'bold', color: colors.first, margin: 0, textAlign: 'left' },
 
-    goalFooter: { display: 'flex', backgroundColor: '#F8FAFC', borderRadius: '12px', padding: '16px', marginTop: '16px' },
+    goalFooter: { display: 'flex', padding: '16px', marginTop: '16px' },
     footerItem: { flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' },
     footerDivider: { width: '1px', backgroundColor: '#E2E8F0', margin: '0 16px' },
-    footerLabel: { fontSize: '9px', fontWeight: 'bold', color: '#94A3B8' },
-    footerValue: { fontSize: '16px', fontWeight: 'bold', color: '#1E293B' },
+    footerLabel: { fontSize: '9px', fontWeight: 'bold', color: colors.first },
+    footerValue: { fontSize: '16px', fontWeight: 'bold', color: colors.fifth },
 
     macroRow: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' },
-    macroCard: { backgroundColor: colors.card, padding: '16px', borderRadius: '12px', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.01)' },
-    macroLabel: { fontSize: '9px', fontWeight: 'bold', color: '#94A3B8', display: 'block', marginBottom: '8px' },
-    macroValue: { fontSize: '16px', fontWeight: 'bold', color: '#1E293B' },
+    macroCard: { backgroundColor: colors.card, padding: '16px', borderRadius: '12px', textAlign: 'center', },
+    macroLabel: { fontSize: '9px', fontWeight: 'bold', color: colors.first, display: 'block', marginBottom: '8px' },
+    macroValue: { fontSize: '16px', fontWeight: 'bold', color: colors.fifth },
 
     // Right Column
     intakeCard: {
@@ -351,7 +352,7 @@ const styles = {
         minHeight: "0",
     },
     intakeHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' },
-    itemCount: { fontSize: '12px', color: '#94A3B8', },
+    itemCount: { fontSize: '12px', color: colors.fifth, },
 
     foodList: {
         flex: "1",
@@ -362,17 +363,17 @@ const styles = {
         minHeight: "0",
     },
     foodItem: { display: 'flex', alignItems: 'center', gap: '16px' },
-    foodIconBox: { width: '40px', height: '40px', borderRadius: '12px', backgroundColor: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' },
+    foodIconBox: { width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' },
     foodInfo: { flex: 1 },
-    foodName: { fontSize: '14px', fontWeight: 'bold', color: '#1E293B' },
-    foodSub: { fontSize: '11px', color: '#94A3B8' },
+    foodName: { fontSize: '14px', fontWeight: 'bold', color: colors.first },
+    foodSub: { fontSize: '11px', color: colors.first },
     foodAction: { display: 'flex', alignItems: 'center', gap: '12px' },
-    foodCal: { fontSize: '14px', color: '#1E293B' },
+    foodCal: { fontSize: '14px', color: colors.first },
     editIcon: { fontSize: '12px', opacity: 0.3, cursor: 'pointer' },
 
     addArea: { display: 'flex', gap: '12px', borderTop: '1px solid #F1F5F9', paddingTop: '24px' },
-    addInput: { flex: 1, border: '1px solid #F1F5F9', borderRadius: '10px', padding: '12px 16px', fontSize: '14px', outline: 'none' },
-    addBtn: { backgroundColor: colors.primary, color: colors.card, border: 'none', borderRadius: '10px', padding: '0 24px', fontWeight: '600', cursor: 'pointer' }
+    addInput: { flex: 1, border: `1px solid #F1F5F9`, borderRadius: '10px', padding: '12px 16px', fontSize: '14px', outline: 'none' },
+    addBtn: { backgroundColor: colors.second, color: colors.card, border: 'none', borderRadius: '10px', padding: '0 24px', fontWeight: '600', cursor: 'pointer' }
 };
 
 export default DietPage;

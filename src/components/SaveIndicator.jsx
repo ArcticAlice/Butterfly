@@ -39,13 +39,13 @@ function SaveIndicator({ status }) {
     const getColor = () => {
         switch (status) {
             case 'saving':
-                return colors.textSecondary;
+                return colors.first;
             case 'saved':
-                return colors.success;
+                return colors.first;
             case 'error':
-                return colors.error;
+                return colors.first;
             default:
-                return colors.textSecondary;
+                return colors.first;
         }
     };
 

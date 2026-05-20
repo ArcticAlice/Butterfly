@@ -1,4 +1,5 @@
 import React from 'react';
+import PageHeader from "../components/PageHeader"
 import { colors, typography, spacing } from '../utils/theme';
 
 function DashboardPage({ onNavigate }) {
@@ -8,14 +9,7 @@ function DashboardPage({ onNavigate }) {
 
     return (
         <div style={styles.container}>
-            {/* Header Section */}
-            <div style={styles.header}>
-                <div style={styles.logoContainer}>
-                    <span style={styles.logoIcon}>🦋</span>
-                    <h1 style={styles.logoText}>Butterfly Health Dashboard</h1>
-                </div>
-                <div style={styles.userIcon}>👤</div>
-            </div>
+            <PageHeader/>
 
             <div style={styles.content}>
                 <h2 style={styles.pageTitle}>Activity Detail</h2>
@@ -130,22 +124,18 @@ function DashboardPage({ onNavigate }) {
 }
 
 const styles = {
-    container: { minHeight: '100vh', backgroundColor: colors.background, paddingBottom: spacing.xxl },
-    header: { 
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
-        padding: `${spacing.md} ${spacing.xl}`, backgroundColor: colors.surface, borderBottom: `1px solid ${colors.border}` 
+    container: {
+        height: '100%',
+        width: '100%',
+        boxSizing: 'border-box',
     },
-    logoContainer: { display: 'flex', alignItems: 'center', gap: spacing.sm },
-    logoIcon: { fontSize: '24px' },
-    logoText: { ...typography.h3, color: colors.primary, margin: 0 },
-    userIcon: { fontSize: '20px', backgroundColor: '#ddd', borderRadius: '50%', padding: '4px' },
     content: { maxWidth: '1100px', margin: '0 auto', padding: spacing.xl },
     pageTitle: { ...typography.h2, color: colors.primary, marginBottom: spacing.lg },
     
     topGrid: { display: 'grid', gridTemplateColumns: '2fr 1fr', gap: spacing.lg, marginBottom: spacing.lg },
     
     card: { 
-        backgroundColor: colors.surface, borderRadius: '16px', padding: spacing.lg, 
+        backgroundColor: colors.card, borderRadius: '16px', padding: spacing.lg, 
         boxShadow: '0 4px 6px rgba(0,0,0,0.02)', cursor: 'pointer' 
     },
     cardHeader: { display: 'flex', justifyContent: 'space-between', marginBottom: spacing.lg },
@@ -159,7 +149,7 @@ const styles = {
     chartLabel: { fontSize: '10px', color: colors.textTertiary, marginTop: spacing.sm },
 
     metricsColumn: { display: 'flex', flexDirection: 'column', gap: spacing.md },
-    smallCard: { backgroundColor: colors.surface, borderRadius: '16px', padding: spacing.md, boxShadow: '0 2px 4px rgba(0,0,0,0.02)', cursor: 'pointer' },
+    smallCard: { backgroundColor: colors.card, borderRadius: '16px', padding: spacing.md, boxShadow: '0 2px 4px rgba(0,0,0,0.02)', cursor: 'pointer' },
     smallCardHeader: { ...typography.caption, fontWeight: '700', marginBottom: spacing.xs },
     metricLabel: { fontSize: '11px', color: colors.textSecondary, margin: 0 },
     metricValueRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginTop: spacing.xs },
@@ -167,7 +157,7 @@ const styles = {
     metricTrendPos: { color: colors.secondary, fontSize: '12px', fontWeight: '600' },
     detailsLink: { fontSize: '12px', color: colors.textSecondary, textDecoration: 'underline' },
 
-    bloodWorkCard: { backgroundColor: colors.surface, borderRadius: '16px', padding: spacing.lg, cursor: 'pointer' },
+    bloodWorkCard: { backgroundColor: colors.card, borderRadius: '16px', padding: spacing.lg, cursor: 'pointer' },
     table: { width: '100%', borderCollapse: 'collapse', marginTop: spacing.md },
     th: { textAlign: 'left', fontSize: '10px', color: colors.textTertiary, padding: spacing.sm, borderBottom: `1px solid ${colors.border}` },
     td: { padding: spacing.md, fontSize: '13px', borderBottom: `1px solid ${colors.border}` },

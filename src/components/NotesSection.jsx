@@ -23,16 +23,15 @@ function NotesSection({ value, onChange, saveStatus, saveField }) {
 const styles = {
     container: { boxSizing: 'border-box', display: 'grid',
     gap: '2%', width: '100%', borderRadius: '24px', },
-    header: { display: 'flex', alignItems: 'center',},
     textareaWrapper: { position: 'relative', backgroundColor: colors.card, borderRadius: '24px', },
     textarea: { 
         width: '100%', border: 'none', outline: 'none', 
-        fontSize: '16px', color: colors.textPrimary, resize: 'none', 
+        fontSize: '16px', color: colors.first, resize: 'none', 
         padding: '15px', boxSizing: 'border-box', borderRadius: '24px',
     },
     saveStatus: { 
         position: 'absolute', bottom: '20px', right: '30px', 
-        fontSize: '12px', color: colors.textPrimary, zIndex: '5',
+        fontSize: '12px', color: colors.first, zIndex: '5',
     }
 };
 

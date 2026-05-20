@@ -40,7 +40,7 @@ function Template({ foodName, initialCalories, onUpdateCalories, onDelete, onEdi
         <div style={style.box}>
             <Vert width="75%" height="75%" onClick={() => setIsEditingName(true)} />
 
-            <div>
+            <div style={{display: "flex", flexDirection: "column", justifyContent: "center"}}>
                 {isEditingName ? (
                     <input
                         ref={nameInputRef}
@@ -76,7 +76,7 @@ const style = {
     box: {
         width: "90%",
         height: "40px",
-        border: `1px solid ${colors.primary}`,
+        border: `1px solid ${colors.second}`,
         borderRadius: "8px",
         display: "grid",
         gridTemplateColumns: "10% 70% 13% 7%",
@@ -88,15 +88,16 @@ const style = {
         overflow: "hidden",
         textOverflow: "ellipsis",
         display: "inline-block",
-        height: "50%",
+        height: "100%",
+        color: colors.first,
     },
     nameInput: {
-        borderRadius: "4px",
-        border: "1px solid #00B4D8",
+        border: `none`,
         fontSize: "14px",
         display: "inline-block",
         outline: "none",
         height: "100%",
+        color: colors.first,
     },
     durationInput: {
         borderRadius: "5px",
@@ -105,6 +106,7 @@ const style = {
         fontSize: "14px",
         height: "80%",
         border: "none",
-        outline: "none"
+        outline: "none",
+        color: colors.first
     }
 };

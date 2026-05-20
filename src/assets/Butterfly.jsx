@@ -1,4 +1,6 @@
-function Butterfly({ width = "50px", height = "50px", color = "#750D37", stroke = "black", strokeWidth = 1, ...props }) {
+import {colors} from "../utils/theme"
+
+function Butterfly({ width = "40px", height = "40px", color = colors.second, stroke = "black", strokeWidth = 1, ...props }) {
 
     const style = {
         cursor: "pointer"
