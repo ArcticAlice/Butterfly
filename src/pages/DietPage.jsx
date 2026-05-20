@@ -1,50 +1,168 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import PageHeader from '../components/PageHeader';
 import DateNavigator from '../components/DateNavigator';
 import NotesSection from '../components/NotesSection';
 import Gauge from '../assets/Guage';
+import Template from '../components/Template';
 import { colors, typography, spacing } from '../styles/theme';
+import { getFoodService } from "../utils/dataFunctions";
 
 function DietPage({ onBack }) {
-    // ========== LOGIC SECTION ==========
     const [currentDate, setCurrentDate] = useState(new Date());
     const [saveStatus, setSaveStatus] = useState('idle');
+    const [formData, setFormData] = useState({ food_info: {}, notes: '' });
+    const [newFoodName, setNewFoodName] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [foodService, setFoodService] = useState(null);
+
     const saveTimeoutRef = useRef(null);
 
-    const [calorieGoal, setCalorieGoal] = useState(1850);
-    const [newFoodName, setNewFoodName] = useState('');
-    const [foodItems, setFoodItems] = useState([
-        { id: 1, name: 'Avocado Toast with Poached Egg', meal: 'Breakfast', time: '08:30 AM', cal: 340, icon: '🥑' },
-        { id: 2, name: 'Grilled Salmon & Quinoa', meal: 'Lunch', time: '12:45 PM', cal: 520, icon: '🍴' },
-        { id: 3, name: 'Green Detox Smoothie', meal: 'Snack', time: '03:15 PM', cal: 180, icon: '🍹' }
-    ]);
+    // Calculate total calories dynamically from the Object
+    let totalFoodCal = 0;
+    if (formData.food_info) {
+        Object.values(formData.food_info).forEach((cals) => {
+            totalFoodCal += Number(cals) || 0;
+        });
+    }
 
-    const handleFieldChange = (field, value) => {
-        setSaveStatus('saving');
+    const goalCal = 3000;
+    const percentage = Math.min((totalFoodCal / goalCal) * 100, 100);
+    const remaining = goalCal - totalFoodCal;
+
+    // Initialize Database Service
+    useEffect(() => {
+        let mounted = true;
+        async function init() {
+            const service = await getFoodService();
+            if (mounted) setFoodService(service);
+        }
+        init();
+        return () => { mounted = false; };
+    }, []);
+
+    // Load Records when Date changes
+    useEffect(() => {
+        const loadFoodRecord = async () => {
+            if (!foodService) return;
+            try {
+                setLoading(true);
+                const record = await foodService.getFoodRecord(currentDate);
+
+                if (record) {
+                    setFormData({
+                        food_info: record.food_info || {},
+                        notes: record.notes || ''
+                    });
+                } else {
+                    setFormData(foodService.getDefaultFoodRecord());
+                }
+            } catch (error) {
+                console.error('Failed to load food record:', error);
+                setFormData(foodService.getDefaultFoodRecord());
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadFoodRecord();
+    }, [currentDate, foodService]);
+
+    useEffect(() => {
+        return () => { if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current); };
+    }, []);
+
+    // Core Saving Mechanism
+    const debouncedSave = (data, instant) => {
         if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
-        saveTimeoutRef.current = setTimeout(() => setSaveStatus('idle'), 2000);
+
+        setSaveStatus('saving');
+        const time = instant ? 500 : 3500;
+
+        saveTimeoutRef.current = setTimeout(async () => {
+            if (!foodService) return;
+            try {
+                await foodService.saveFoodRecord(currentDate, data);
+                setSaveStatus('saved');
+                setTimeout(() => setSaveStatus('idle'), 1000);
+            } catch (error) {
+                console.error('Failed to save food record:', error);
+                setSaveStatus('error');
+                setTimeout(() => setSaveStatus('idle'), 1000);
+            }
+        }, time);
     };
 
-    const totals = foodItems.reduce((acc, item) => acc + item.cal, 0);
-    const remaining = calorieGoal - totals;
-    const progress = Math.min((totals / calorieGoal) * 100, 100);
+    // const saveField = (field, instant = false, directValue = null) => {
+    //     const rawValue = directValue !== null ? directValue : tempValues[field];
+    //     const textFields = ['notes', 'sleep_start_time', 'sleep_end_time'];
+    //     const formattedValue = textFields.includes(field) ? rawValue : rawValue === '' ? 0 : Number(rawValue);
+
+    //     const updatedData = {
+    //         ...formData,
+    //         [field]: formattedValue
+    //     };
+
+    //     setFormData(updatedData);
+    //     setEditingFields(prev => ({ ...prev, [field]: false }));
+    //     debouncedSave(updatedData, instant);
+    // };
+
+    // --- Data Manipulation Handlers ---
 
     const handleAddFood = () => {
-        if (!newFoodName.trim()) return;
-        const newItem = {
-            id: Date.now(),
-            name: newFoodName,
-            meal: 'Log',
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            cal: 0,
-            icon: '🥗'
-        };
-        setFoodItems([...foodItems, newItem]);
+        const name = newFoodName.trim();
+        if (!name) return;
+
+        const updatedInfo = { ...formData.food_info };
+        if (!(name in updatedInfo)) {
+            updatedInfo[name] = 0;
+        }
+
+        const updatedData = { ...formData, food_info: updatedInfo };
+        setFormData(updatedData);
         setNewFoodName('');
-        handleFieldChange();
+        debouncedSave(updatedData, true);
     };
 
-    // ========== RETURN STATEMENT ==========
+    const handleUpdateCalories = (foodName, newCalories) => {
+        const updatedInfo = { ...formData.food_info };
+        updatedInfo[foodName] = newCalories;
+
+        const updatedData = { ...formData, food_info: updatedInfo };
+        setFormData(updatedData);
+        debouncedSave(updatedData, true);
+    };
+
+    const handleEditFoodName = (oldName, newName) => {
+        const updatedInfo = { ...formData.food_info };
+
+        // Save the old calories, delete the old key, and assign it to the new key
+        const existingCalories = updatedInfo[oldName];
+        delete updatedInfo[oldName];
+        updatedInfo[newName] = existingCalories;
+
+        const updatedData = { ...formData, food_info: updatedInfo };
+        setFormData(updatedData);
+        debouncedSave(updatedData, true);
+    };
+
+    const handleDeleteFood = (foodName) => {
+        const updatedInfo = { ...formData.food_info };
+        delete updatedInfo[foodName];
+
+        const updatedData = { ...formData, food_info: updatedInfo };
+        setFormData(updatedData);
+        debouncedSave(updatedData, true);
+    };
+
+    const handleNotesChange = (value) => {
+        const updatedData = { ...formData, notes: value };
+        setFormData(updatedData);
+        debouncedSave(updatedData, false);
+    };
+
+    if (loading) return <div>Loading...</div>;
+
     return (
         <div style={styles.container}>
             <PageHeader onBack={onBack} />
@@ -52,33 +170,35 @@ function DietPage({ onBack }) {
             <div style={styles.content}>
                 <DateNavigator
                     currentDate={currentDate}
-                    onPrevious={() => setCurrentDate(new Date(currentDate.setDate(currentDate.getDate() - 1)))}
-                    onNext={() => setCurrentDate(new Date(currentDate.setDate(currentDate.getDate() + 1)))}
+                    onPrevious={() => setCurrentDate(prev => new Date(new Date(prev).setDate(prev.getDate() - 1)))}
+                    onNext={() => setCurrentDate(prev => new Date(new Date(prev).setDate(prev.getDate() + 1)))}
                 />
 
                 <div style={styles.mainGrid}>
                     {/* Left Column: Calorie Goal & Macros */}
                     <div style={styles.leftCol}>
-                        <div style={styles.goalCard}>
+                        <div style={styles.summaryCard}>
                             <h3 style={styles.cardHeader}>Calorie Goal</h3>
-                            <div style={styles.gaugeContainer}>
-                                <Gauge
-                                    percentage={23}
-                                    totalSleepMins={1500}
-                                    goalText="3000"
-                                    valueStyle={styles.gaugeValue}
-                                    goalStyle={styles.gaugeGoal}
-                                />
+                            <div style={styles.gaugeWrapper}>
+                                <Gauge percentage={percentage} goalText={goalCal.toString()} />
+                                <p style={styles.gaugeText}>
+                                    <span style={{ fontSize: '24px', fontWeight: 'bold', color: colors.primary }}>
+                                        {totalFoodCal}
+                                    </span>
+                                    <span style={{ fontSize: '12px', color: '#94A3B8' }}>Calories</span>
+                                </p>
                             </div>
                             <div style={styles.goalFooter}>
                                 <div style={styles.footerItem}>
                                     <span style={styles.footerLabel}>DAILY TARGET</span>
-                                    <span style={styles.footerValue}>{calorieGoal} <small>kcal</small></span>
+                                    <span style={styles.footerValue}>{goalCal} <small>kcal</small></span>
                                 </div>
                                 <div style={styles.footerDivider} />
                                 <div style={styles.footerItem}>
                                     <span style={styles.footerLabel}>REMAINING</span>
-                                    <span style={{ ...styles.footerValue, color: colors.secondary }}>{remaining} <small>kcal</small></span>
+                                    <span style={{ ...styles.footerValue, color: remaining < 0 ? colors.error : colors.secondary }}>
+                                        {remaining} <small>kcal</small>
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -103,29 +223,26 @@ function DietPage({ onBack }) {
                     <div style={styles.intakeCard}>
                         <div style={styles.intakeHeader}>
                             <h3 style={styles.cardHeader}>Daily Intake</h3>
-                            <span style={styles.itemCount}>{foodItems.length} Items Logged</span>
+                            <span style={styles.itemCount}>{Object.keys(formData.food_info).length} Items Logged</span>
                         </div>
 
                         <div style={styles.foodList}>
-                            {foodItems.map(item => (
-                                <div key={item.id} style={styles.foodItem}>
-                                    <div style={styles.foodIconBox}>{item.icon}</div>
-                                    <div style={styles.foodInfo}>
-                                        <div style={styles.foodName}>{item.name}</div>
-                                        <div style={styles.foodSub}>{item.meal} • {item.time}</div>
-                                    </div>
-                                    <div style={styles.foodAction}>
-                                        <span style={styles.foodCal}><b>{item.cal}</b> <small>KCAL</small></span>
-                                        <span style={styles.editIcon}>✏️</span>
-                                    </div>
-                                </div>
+                            {Object.entries(formData.food_info).map(([foodName, calories]) => (
+                                <Template
+                                    key={foodName}
+                                    foodName={foodName}
+                                    initialCalories={calories}
+                                    onUpdateCalories={handleUpdateCalories}
+                                    onEditName={handleEditFoodName}
+                                    onDelete={() => handleDeleteFood(foodName)}
+                                />
                             ))}
                         </div>
 
                         <div style={styles.addArea}>
                             <input
                                 style={styles.addInput}
-                                placeholder="Search or type food item..."
+                                placeholder="Type food item..."
                                 value={newFoodName}
                                 onChange={(e) => setNewFoodName(e.target.value)}
                             />
@@ -135,9 +252,10 @@ function DietPage({ onBack }) {
                 </div>
 
                 <NotesSection
-                    label="Notes"
-                    placeholder="Enter Notes?"
+                    value={formData.notes}
+                    onChange={handleNotesChange}
                     saveStatus={saveStatus}
+                    // saveField={saveField}
                 />
             </div>
         </div>
@@ -145,7 +263,11 @@ function DietPage({ onBack }) {
 }
 
 const styles = {
-    container: { height: '100vh', width: '100vw', boxSizing: 'border-box' },
+    container: {
+        height: '100%',
+        width: '100%',
+        boxSizing: 'border-box',
+    },
     content: {
         width: '60%',
         height: '93%',
@@ -154,20 +276,55 @@ const styles = {
         left: '50%',
         transform: 'translateX(-50%)',
         display: 'grid',
-        gridTemplateRows: '.1fr 1fr .8fr',
+        gridTemplateRows: '5% 58% 28%',
         gap: '2%',
         boxSizing: 'border-box',
         paddingTop: '2%',
     },
-    mainGrid: { display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: spacing.xl, width: '100%', },
-
+    mainGrid: {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1.5fr',
+        gap: spacing.xl,
+        width: '100%',
+    },
     // Left Column
-    leftCol: { display: 'flex', flexDirection: 'column', gap: '24px' },
-    goalCard: { backgroundColor: colors.card, borderRadius: '24px', padding: '32px', textAlign: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' },
+    leftCol: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '24px',
+    },
+    summaryCard: {
+        backgroundColor: colors.card,
+        borderRadius: '24px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxSizing: 'border-box',
+        padding: '32px',
+    },
+    gaugeWrapper: {
+        position: 'relative',
+        width: 220,
+        height: 220,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    gaugeText: {
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1,
+        textAlign: 'center',
+        pointerEvents: 'none',
+    },
     cardHeader: { fontSize: '16px', fontWeight: 'bold', color: '#1E293B', margin: 0, textAlign: 'left' },
-    gaugeArea: { padding: '20px 0' },
-    gaugeValue: { fontSize: '10px', fontWeight: 'bold', fill: '#1E293B' },
-    gaugeLabel: { fontSize: '4px', fill: '#94A3B8', fontWeight: 'bold' },
 
     goalFooter: { display: 'flex', backgroundColor: '#F8FAFC', borderRadius: '12px', padding: '16px', marginTop: '16px' },
     footerItem: { flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' },
@@ -181,11 +338,25 @@ const styles = {
     macroValue: { fontSize: '16px', fontWeight: 'bold', color: '#1E293B' },
 
     // Right Column
-    intakeCard: { backgroundColor: colors.card, borderRadius: '24px', padding: '32px', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' },
+    intakeCard: {
+        backgroundColor: colors.card,
+        borderRadius: '24px',
+        padding: '32px',
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: "0",
+    },
     intakeHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' },
-    itemCount: { fontSize: '12px', color: '#94A3B8', fontWeight: '500' },
+    itemCount: { fontSize: '12px', color: '#94A3B8', },
 
-    foodList: { flex: 1, display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '32px' },
+    foodList: {
+        flex: "1",
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '20px',
+        overflowY: "auto",
+        minHeight: "0",
+    },
     foodItem: { display: 'flex', alignItems: 'center', gap: '16px' },
     foodIconBox: { width: '40px', height: '40px', borderRadius: '12px', backgroundColor: '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' },
     foodInfo: { flex: 1 },

@@ -23,7 +23,6 @@ function SleepPage({ onBack }) {
         (formData.rem_sleep_duration || 0) +
         (formData.deep_sleep_duration || 0) +
         (formData.light_sleep_duration || 0);
-
     const goalMins = 480;
     const percentage = Math.min((totalSleepMins / goalMins) * 100, 100);
 
@@ -156,16 +155,7 @@ function SleepPage({ onBack }) {
         { field: 'awake_duration', label: 'Awake', color: colors.primarySoft }
     ];
 
-    if (loading) {
-        return (
-            <div style={styles.container}>
-                <PageHeader onBack={onBack} />
-                <div style={styles.loadingContainer}>
-                    <div style={styles.loadingText}>Loading sleep data...</div>
-                </div>
-            </div>
-        );
-    }
+    if (loading) return <div>Loading...</div>;
 
     return (
         <div style={styles.container}>
@@ -199,7 +189,7 @@ function SleepPage({ onBack }) {
                                 goalText="GOAL: 8h 00m"
                             />
 
-                            <div style={styles.guageText}>
+                            <div style={styles.gaugeText}>
                                 <p style={{ margin: 0, fontSize: '18px', fontWeight: '700' }}>
                                     {formatTime(totalSleepMins)}
                                 </p>
@@ -238,9 +228,11 @@ function SleepPage({ onBack }) {
                                             {formData.sleep_start_time || '--:-- --'}
                                         </span>
                                     )}
-                                    <div onClick={() => editingFields.sleep_start_time ? saveField('sleep_start_time', true) : startEditing('sleep_start_time')}>
-                                        <Pencil width='20px' height='20px' color={colors.secondary} />
-                                    </div>
+                                    {!editingFields.sleep_start_time && (
+                                        <div onClick={() => startEditing(field)}>
+                                            <Pencil width='15px' height='15px' />
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div style={{ ...styles.fieldValueRow, ...(editingFields.sleep_end_time) }}>
@@ -259,9 +251,11 @@ function SleepPage({ onBack }) {
                                             {formData.sleep_end_time || '--:-- --'}
                                         </span>
                                     )}
-                                    <div onClick={() => editingFields.sleep_end_time ? saveField('sleep_end_time', true) : startEditing('sleep_end_time')}>
-                                        <Pencil width='18px' height='18px' color={colors.secondary} />
-                                    </div>
+                                    {!editingFields.sleep_end_time && (
+                                        <div onClick={() => startEditing(field)}>
+                                            <Pencil width='15px' height='15px' />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -288,9 +282,11 @@ function SleepPage({ onBack }) {
                                     ) : (
                                         <span style={styles.stageValue}>{formatTime(formData[field])}</span>
                                     )}
-                                    <div onClick={() => editingFields[field] ? saveField(field, true) : startEditing(field)}>
-                                        <Pencil width='15px' height='15px' />
-                                    </div>
+                                    {!editingFields[field] && (
+                                        <div onClick={() => startEditing(field)}>
+                                            <Pencil width='15px' height='15px' />
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -300,7 +296,6 @@ function SleepPage({ onBack }) {
                 <NotesSection
                     value={formData.notes}
                     onChange={handleNotesChange}
-                    label="Dream Journal & Notes"
                     saveStatus={saveStatus}
                     saveField={saveField}
                 />
@@ -356,7 +351,7 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'center',
     },
-    guageText: {
+    gaugeText: {
         position: 'absolute',
         top: '50%',
         left: '50%',

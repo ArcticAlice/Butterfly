@@ -1,12 +1,9 @@
 import React from 'react';
 import { colors, typography, spacing } from '../styles/theme';
 
-function NotesSection({ value, onChange, label, saveStatus, saveField }) {
+function NotesSection({ value, onChange, saveStatus, saveField }) {
     return (
         <div style={styles.container}>
-            <div style={styles.header}>
-                <h3>{label}</h3>
-            </div>
             <div style={styles.textareaWrapper}>
                 <textarea
                     value={value}
@@ -24,12 +21,12 @@ function NotesSection({ value, onChange, label, saveStatus, saveField }) {
 }
 
 const styles = {
-    container: { boxSizing: 'border-box', display: 'grid', gridTemplateRows: '1fr 5fr', 
-    gap: '2%', width: '100%', height: '100%', borderRadius: '24px', },
+    container: { boxSizing: 'border-box', display: 'grid',
+    gap: '2%', width: '100%', borderRadius: '24px', },
     header: { display: 'flex', alignItems: 'center',},
     textareaWrapper: { position: 'relative', backgroundColor: colors.card, borderRadius: '24px', },
     textarea: { 
-        width: '100%', height: '100%', border: 'none', outline: 'none', 
+        width: '100%', border: 'none', outline: 'none', 
         fontSize: '16px', color: colors.textPrimary, resize: 'none', 
         padding: '15px', boxSizing: 'border-box', borderRadius: '24px',
     },

@@ -3,7 +3,8 @@ import { colors } from "../styles/theme";
 function Pencil( {width = "50px", height = "50px", color = colors.secondary, stroke = "white", strokeWidth = 1, ...props} ) {
 
     const style = {
-        cursor: "pointer"
+        cursor: "pointer",
+        display: "inline-block"
     }
 
         return (

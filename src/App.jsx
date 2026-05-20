@@ -29,9 +29,9 @@ function App() {
   };
 
   const renderPage = () => {
-    if (!isAuthenticated) {
-      return <AuthPage onAuthenticate={handleAuthenticate} />;
-    }
+    // if (!isAuthenticated) {
+    //   return <AuthPage onAuthenticate={handleAuthenticate} />;
+    // }
 
     switch (currentPage) {
       case 'dashboard':
@@ -53,8 +53,8 @@ function App() {
 
   // ========== RETURN STATEMENT ==========
   return (
-    //   {renderPage()}
-    <SleepPage/>
+      renderPage()
+    // <DietPage/>
   );
 }
 
