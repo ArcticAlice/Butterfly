@@ -155,7 +155,7 @@ function SleepPage({ onBack }) {
         { field: 'awake_duration', label: 'Awake', color: colors.fourth }
     ];
 
-    if (loading) return <div>Loading...</div>;
+    while (loading) return <div>Loading...</div>;
 
     return (
         <div style={styles.container}>
