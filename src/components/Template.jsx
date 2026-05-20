@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Vert from "../assets/Vert";
 import Pencil from "../assets/Pencil";
+import {colors} from "../utils/theme"
 
 function Template({ foodName, initialCalories, onUpdateCalories, onDelete, onEditName }) {
     const [calories, setCalories] = useState(initialCalories || '');
@@ -75,7 +76,7 @@ const style = {
     box: {
         width: "90%",
         height: "40px",
-        border: "1px solid #750D37",
+        border: `1px solid ${colors.primary}`,
         borderRadius: "8px",
         display: "grid",
         gridTemplateColumns: "10% 70% 13% 7%",
@@ -87,7 +88,7 @@ const style = {
         overflow: "hidden",
         textOverflow: "ellipsis",
         display: "inline-block",
-        height: "100%",
+        height: "50%",
     },
     nameInput: {
         borderRadius: "4px",

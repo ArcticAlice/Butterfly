@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import Left from '../assets/Left.jsx'
 import Right from '../assets/Right.jsx'
-import { colors, typography, spacing } from '../styles/theme';
+import { colors, typography, spacing } from '../utils/theme.js';
 
 function DateNavigator({ currentDate, onPrevious, onNext, format = 'long' }) {
 

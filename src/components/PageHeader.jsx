@@ -1,5 +1,5 @@
 import React from 'react';
-import { colors, typography, spacing } from '../styles/theme';
+import { colors, typography, spacing } from '../utils/theme.js';
 import Butterfly from '../assets/Butterfly.jsx';
 
 function PageHeader({ title = false, onBack, showBackButton = true }) {

@@ -4,7 +4,7 @@ import DateNavigator from '../components/DateNavigator';
 import NotesSection from '../components/NotesSection';
 import Gauge from '../assets/Guage';
 import Template from '../components/Template';
-import { colors, typography, spacing } from '../styles/theme';
+import { colors, typography, spacing } from '../utils/theme';
 import { getFoodService } from "../utils/dataFunctions";
 
 function DietPage({ onBack }) {
@@ -92,20 +92,17 @@ function DietPage({ onBack }) {
         }, time);
     };
 
-    // const saveField = (field, instant = false, directValue = null) => {
-    //     const rawValue = directValue !== null ? directValue : tempValues[field];
-    //     const textFields = ['notes', 'sleep_start_time', 'sleep_end_time'];
-    //     const formattedValue = textFields.includes(field) ? rawValue : rawValue === '' ? 0 : Number(rawValue);
+    const saveField = (field, instant = false, directValue = null) => {
+        const rawValue = directValue !== null ? directValue : formData[field];
 
-    //     const updatedData = {
-    //         ...formData,
-    //         [field]: formattedValue
-    //     };
+        const updatedData = {
+            ...formData,
+            [field]: rawValue
+        };
 
-    //     setFormData(updatedData);
-    //     setEditingFields(prev => ({ ...prev, [field]: false }));
-    //     debouncedSave(updatedData, instant);
-    // };
+        setFormData(updatedData);
+        debouncedSave(updatedData, instant);
+    };
 
     // --- Data Manipulation Handlers ---
 
@@ -122,6 +119,12 @@ function DietPage({ onBack }) {
         setFormData(updatedData);
         setNewFoodName('');
         debouncedSave(updatedData, true);
+    };
+
+    const handleAddFoodKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            handleAddFood();
+        }
     };
 
     const handleUpdateCalories = (foodName, newCalories) => {
@@ -206,15 +209,15 @@ function DietPage({ onBack }) {
                         <div style={styles.macroRow}>
                             <div style={{ ...styles.macroCard, borderTop: `3px solid ${colors.secondary}` }}>
                                 <span style={styles.macroLabel}>PROTEIN</span>
-                                <span style={styles.macroValue}>64g</span>
+                                <span style={styles.macroValue}>?</span>
                             </div>
                             <div style={{ ...styles.macroCard, borderTop: `3px solid ${colors.accent}` }}>
                                 <span style={styles.macroLabel}>CARBS</span>
-                                <span style={styles.macroValue}>128g</span>
+                                <span style={styles.macroValue}>?</span>
                             </div>
-                            <div style={{ ...styles.macroCard, borderTop: `3px solid ${colors.error}` }}>
+                            <div style={{ ...styles.macroCard, borderTop: `3px solid ${colors.primarySoft}` }}>
                                 <span style={styles.macroLabel}>FAT</span>
-                                <span style={styles.macroValue}>42g</span>
+                                <span style={styles.macroValue}>?</span>
                             </div>
                         </div>
                     </div>
@@ -245,6 +248,7 @@ function DietPage({ onBack }) {
                                 placeholder="Type food item..."
                                 value={newFoodName}
                                 onChange={(e) => setNewFoodName(e.target.value)}
+                                onKeyDown={handleAddFoodKeyPress}
                             />
                             <button style={styles.addBtn} onClick={handleAddFood}>Add</button>
                         </div>
@@ -255,7 +259,7 @@ function DietPage({ onBack }) {
                     value={formData.notes}
                     onChange={handleNotesChange}
                     saveStatus={saveStatus}
-                    // saveField={saveField}
+                    saveField={saveField}
                 />
             </div>
         </div>

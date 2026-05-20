@@ -1,21 +1,9 @@
-// ========== COLOR PALETTE ==========
-// export const colors = {
-//     primary: '#EEAFAF',        // Deep Teal (Butterfly logo/headers)
-//     secondary: '#99D17B',      // Emerald Green (Success/Optimal)
-//     accent: '#B47978',         // Blue accent for toggle/icons
-//     background: '#F0F4F9',     // Light background gray
-//     cardElements: '#FFFFFF',        // White cards
-//     textPrimary: '#000000',    // Near-black for headings
-//     headings: '#B1AE91',  // Medium gray for labels
-//     headingSecondary: '#95BF8F',   // Light gray for subtle text
-// };
-
 export const colors = {
-  primary: '#750D37',        // main actions
-  primarySoft: '#d89a9e',    // light backgrounds
+  primary: '#4E6E5D',        
+  primarySoft: '#CFCFCF',    
 
-  secondary: '#01763B',      // subtle highlights
-  accent: '#e0c1b3',         // rare emphasis
+  secondary: '#01763B',     
+  accent: '#e0c1b3',         
 
 //   background: '#F0F4F9',
   background: '#EFF6FF88',

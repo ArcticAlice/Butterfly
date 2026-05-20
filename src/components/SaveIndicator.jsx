@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { colors, typography, spacing } from '../styles/theme';
+import { colors, typography, spacing } from '../utils/theme';
 
 function SaveIndicator({ status }) {
     // ========== LOGIC SECTION ==========

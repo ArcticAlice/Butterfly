@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PageHeader from '../components/PageHeader';
 import NotesSection from '../components/NotesSection';
-import { colors, typography, spacing } from '../styles/theme';
+import { colors, typography, spacing } from '../utils/theme';
 
 function BloodWorkPage({ onBack }) {
     // ========== LOGIC SECTION ==========

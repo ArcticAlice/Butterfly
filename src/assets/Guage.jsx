@@ -1,4 +1,4 @@
-import { colors } from "../styles/theme";
+import { colors } from "../utils/theme";
 
 function Gauge({
     width = 220,

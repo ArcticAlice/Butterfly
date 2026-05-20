@@ -4,7 +4,7 @@ import DateNavigator from '../components/DateNavigator';
 import NotesSection from '../components/NotesSection';
 import Gauge from '../assets/Guage';
 import Pencil from '../assets/Pencil';
-import { colors, typography, spacing } from '../styles/theme';
+import { colors, typography, spacing } from '../utils/theme';
 import { getSleepService } from "../utils/dataFunctions";
 import { formatTime } from '../utils/helperFunctions';
 

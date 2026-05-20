@@ -1,5 +1,5 @@
 import React from 'react';
-import { colors, typography, spacing } from '../styles/theme';
+import { colors, typography, spacing } from '../utils/theme';
 
 function FormField({
     label,
