@@ -169,7 +169,6 @@ vite.config.ts.timestamp-*
 # Custom files
 /public
 /.vscode
-/src-tauri
 package-lock.json
 package.json
 vite.config.js
