@@ -308,6 +308,7 @@ const styles = {
         justifyContent: 'center',
         boxSizing: 'border-box',
         padding: '32px',
+        minHeight: "0",
     },
     gaugeWrapper: {
         position: 'relative',
