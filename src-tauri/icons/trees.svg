@@ -1,8 +1,8 @@
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
-<svg width="800px" height="800px" viewBox="-204.8 -204.8 1433.60 1433.60" class="icon" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#000000">
+<svg width="800px" height="800px" viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="http://www.w3.org/2000/svg" fill="#000000" stroke="#000000">
 <g id="SVGRepo_bgCarrier" stroke-width="0"/>
-<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" stroke-width="6.144"/>
+<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"/>
 <g id="SVGRepo_iconCarrier">
 <path d="M512 512m-512 0a512 512 0 1 0 1024 0 512 512 0 1 0-1024 0Z" fill="#9AF4EF"/>
 <path d="M8.234 420.956C2.926 450.518 0 480.91 0 512s2.926 61.482 8.234 91.044c112.3 42.29 300.58 70.04 513.992 70.04 200.17 0 378.166-24.428 492.166-62.352C1020.638 578.776 1024 545.786 1024 512s-3.362-66.776-9.606-98.732c-114-37.924-291.996-62.354-492.166-62.354-213.414 0-401.692 27.752-513.994 70.042z" fill="#4CD3CB"/>
