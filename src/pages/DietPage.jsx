@@ -30,23 +30,30 @@ function DietPage({ onBack }) {
     const remaining = Math.max((goalCal - totalFoodCal), 0);
 
     // Initialize Database Service
-    useEffect(() => {
-        let mounted = true;
-        async function init() {
-            const service = await getFoodService();
-            if (mounted) setFoodService(service);
-        }
-        init();
-        return () => { mounted = false; };
-    }, []);
+    // useEffect(() => {
+    //     let mounted = true;
+    //     async function init() {
+    //         const service = await getFoodService();
+    //         if (mounted) setFoodService(service);
+    //     }
+    //     init();
+    //     return () => { mounted = false; };
+    // }, []);
 
     // Load Records when Date changes
     useEffect(() => {
-        const loadFoodRecord = async () => {
-            if (!foodService) return;
+        let mounted = true;
+        async function initialize() {
             try {
-                setLoading(true);
+                setLoading(true)
+
+                const service = await getFoodService();
+                if (!mounted) return;
+
+                setFoodService(service)
+
                 const record = await foodService.getFoodRecord(currentDate);
+                if (!mounted) return;
 
                 if (record) {
                     setFormData({
@@ -62,10 +69,40 @@ function DietPage({ onBack }) {
             } finally {
                 setLoading(false);
             }
-        };
 
-        loadFoodRecord();
-    }, [currentDate, foodService]);
+        }
+
+        initialize();
+
+        return () => {
+            mounted = false;
+        };
+    }, [currentDate]);
+
+    //     const loadFoodRecord = async () => {
+    //         if (!foodService) return;
+    //         try {
+    //             setLoading(true);
+    //             const record = await foodService.getFoodRecord(currentDate);
+
+    //             if (record) {
+    //                 setFormData({
+    //                     food_info: record.food_info || {},
+    //                     notes: record.notes || ''
+    //                 });
+    //             } else {
+    //                 setFormData(foodService.getDefaultFoodRecord());
+    //             }
+    //         } catch (error) {
+    //             console.error('Failed to load food record:', error);
+    //             setFormData(foodService.getDefaultFoodRecord());
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
+
+    //     loadFoodRecord();
+    // }, [currentDate, foodService]);
 
     useEffect(() => {
         return () => { if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current); };
@@ -103,8 +140,6 @@ function DietPage({ onBack }) {
         setFormData(updatedData);
         debouncedSave(updatedData, instant);
     };
-
-    // --- Data Manipulation Handlers ---
 
     const handleAddFood = () => {
         const name = newFoodName.trim();
