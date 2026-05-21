@@ -290,12 +290,14 @@ const styles = {
         gridTemplateColumns: '1fr 1.5fr',
         gap: spacing.xl,
         width: '100%',
+        minHeight: "0",
     },
     // Left Column
     leftCol: {
         display: 'flex',
         flexDirection: 'column',
         gap: '24px',
+        minHeight: "0",
     },
     summaryCard: {
         backgroundColor: colors.card,
