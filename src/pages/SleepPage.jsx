@@ -155,8 +155,6 @@ function SleepPage({ onBack }) {
         { field: 'awake_duration', label: 'Awake', color: colors.fourth }
     ];
 
-    while (loading) return <div>Loading...</div>;
-
     return (
         <div style={styles.container}>
             <PageHeader onBack={onBack} />
@@ -229,9 +227,7 @@ function SleepPage({ onBack }) {
                                         </span>
                                     )}
                                     {!editingFields.sleep_start_time && (
-                                        <div onClick={() => startEditing(field)}>
-                                            <Pencil width='15px' height='15px' />
-                                        </div>
+                                        <Pencil width='15px' height='15px' onClick={() => startEditing('sleep_start_time')}/>
                                     )}
                                 </div>
 
@@ -252,9 +248,7 @@ function SleepPage({ onBack }) {
                                         </span>
                                     )}
                                     {!editingFields.sleep_end_time && (
-                                        <div onClick={() => startEditing(field)}>
-                                            <Pencil width='15px' height='15px' />
-                                        </div>
+                                            <Pencil width='15px' height='15px' onClick={() => startEditing('sleep_end_time')}/>
                                     )}
                                 </div>
                             </div>

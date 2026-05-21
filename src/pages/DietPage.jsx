@@ -27,7 +27,7 @@ function DietPage({ onBack }) {
 
     const goalCal = 3000;
     const percentage = Math.min((totalFoodCal / goalCal) * 100, 100);
-    const remaining = goalCal - totalFoodCal;
+    const remaining = Math.max((goalCal - totalFoodCal), 0);
 
     // Initialize Database Service
     useEffect(() => {
@@ -164,8 +164,6 @@ function DietPage({ onBack }) {
         debouncedSave(updatedData, false);
     };
 
-    while (loading) return <div>Loading...</div>;
-
     return (
         <div style={styles.container}>
             <PageHeader onBack={onBack} />
@@ -181,29 +179,31 @@ function DietPage({ onBack }) {
                     {/* Left Column: Calorie Goal & Macros */}
                     <div style={styles.leftCol}>
                         <div style={styles.summaryCard}>
+
                             <h3 style={styles.cardHeader}>Calorie Goal</h3>
+
                             <div style={styles.gaugeWrapper}>
                                 <Gauge percentage={percentage} goalText={goalCal.toString()} />
+
                                 <p style={styles.gaugeText}>
-                                    <span style={{ fontSize: '24px', fontWeight: 'bold', color: colors.primary }}>
-                                        {totalFoodCal}
-                                    </span>
-                                    <span style={{ fontSize: '12px', color: colors.fifth }}>Calories</span>
+                                    {`${totalFoodCal} \n Calories`}
                                 </p>
                             </div>
+
                             <div style={styles.goalFooter}>
                                 <div style={styles.footerItem}>
-                                    <span style={styles.footerLabel}>DAILY TARGET</span>
-                                    <span style={styles.footerValue}>{goalCal} <small>kcal</small></span>
+                                    <p style={styles.footerLabel}>DAILY TARGET</p>
+                                    <p style={styles.footerValue}>{goalCal} kcal</p>
                                 </div>
                                 <div style={styles.footerDivider} />
                                 <div style={styles.footerItem}>
-                                    <span style={styles.footerLabel}>REMAINING</span>
-                                    <span style={{ ...styles.footerValue, color: remaining < 0 ? colors.first : colors.third }}>
-                                        {remaining} <small>kcal</small>
-                                    </span>
+                                    <p style={styles.footerLabel}>REMAINING</p>
+                                    <p style={{ ...styles.footerValue, color: colors.third }}>
+                                        {remaining} kcal
+                                    </p>
                                 </div>
                             </div>
+
                         </div>
 
                         <div style={styles.macroRow}>
@@ -298,6 +298,7 @@ const styles = {
         flexDirection: 'column',
         gap: '24px',
         minHeight: "0",
+        justifyContent: "center",
     },
     summaryCard: {
         backgroundColor: colors.card,
@@ -334,9 +335,9 @@ const styles = {
     },
     cardHeader: { fontSize: '16px', fontWeight: 'bold', color: colors.first, margin: 0, textAlign: 'left' },
 
-    goalFooter: { display: 'flex', padding: '16px', marginTop: '16px' },
-    footerItem: { flex: 1, display: 'flex', flexDirection: 'column', gap: '4px' },
-    footerDivider: { width: '1px', backgroundColor: '#E2E8F0', margin: '0 16px' },
+    goalFooter: { display: 'flex', padding: '16px', marginTop: '16px', width: "80%", flexDirection: "row", },
+    footerItem: { flex: 2, display: 'flex', flexDirection: 'column', gap: '4px', justifyContent: "center", alignItems: "center" },
+    footerDivider: { flex: .03, backgroundColor: '#E2E8F0', margin: '0 16px' },
     footerLabel: { fontSize: '9px', fontWeight: 'bold', color: colors.first },
     footerValue: { fontSize: '16px', fontWeight: 'bold', color: colors.fifth },
 
