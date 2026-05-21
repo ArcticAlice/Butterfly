@@ -29,18 +29,6 @@ function DietPage({ onBack }) {
     const percentage = Math.min((totalFoodCal / goalCal) * 100, 100);
     const remaining = Math.max((goalCal - totalFoodCal), 0);
 
-    // Initialize Database Service
-    // useEffect(() => {
-    //     let mounted = true;
-    //     async function init() {
-    //         const service = await getFoodService();
-    //         if (mounted) setFoodService(service);
-    //     }
-    //     init();
-    //     return () => { mounted = false; };
-    // }, []);
-
-    // Load Records when Date changes
     useEffect(() => {
         let mounted = true;
         async function initialize() {
@@ -79,33 +67,12 @@ function DietPage({ onBack }) {
         };
     }, [currentDate]);
 
-    //     const loadFoodRecord = async () => {
-    //         if (!foodService) return;
-    //         try {
-    //             setLoading(true);
-    //             const record = await foodService.getFoodRecord(currentDate);
-
-    //             if (record) {
-    //                 setFormData({
-    //                     food_info: record.food_info || {},
-    //                     notes: record.notes || ''
-    //                 });
-    //             } else {
-    //                 setFormData(foodService.getDefaultFoodRecord());
-    //             }
-    //         } catch (error) {
-    //             console.error('Failed to load food record:', error);
-    //             setFormData(foodService.getDefaultFoodRecord());
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     };
-
-    //     loadFoodRecord();
-    // }, [currentDate, foodService]);
-
     useEffect(() => {
-        return () => { if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current); };
+        return () => {
+            if (saveTimeoutRef.current) {
+                clearTimeout(saveTimeoutRef.current);
+            }
+        };
     }, []);
 
     // Core Saving Mechanism
@@ -198,6 +165,8 @@ function DietPage({ onBack }) {
         setFormData(updatedData);
         debouncedSave(updatedData, false);
     };
+
+    if (loading) return <div>Loading...</div>;
 
     return (
         <div style={styles.container}>
