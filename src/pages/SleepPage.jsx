@@ -71,56 +71,6 @@ function SleepPage({ onBack }) {
         };
     }, [currentDate]);
 
-    // useEffect(() => {
-    //     let mounted = true;
-
-    //     async function init() {
-    //         const service = await getSleepService();
-    //         if (mounted) {
-    //             setSleepService(service);
-    //         }
-    //     }
-
-    //     init();
-
-    //     return () => {
-    //         mounted = false;
-    //     };
-    // }, []);
-
-    // Load sleep record from database for current date
-    // const loadSleepRecord = async () => {
-    //     if (!sleepService) {
-    //         setLoading(false);
-    //         return;
-    //     }
-
-    //     try {
-    //         setLoading(true);
-    //         const record = await sleepService.getSleepRecord(currentDate);
-
-    //         if (record) {
-    //             setFormData({
-    //                 sleep_start_time: record.sleep_start_time || '',
-    //                 sleep_end_time: record.sleep_end_time || '',
-    //                 rem_sleep_duration: record.rem_sleep_duration || 0,
-    //                 deep_sleep_duration: record.deep_sleep_duration || 0,
-    //                 light_sleep_duration: record.light_sleep_duration || 0,
-    //                 awake_duration: record.awake_duration || 0,
-    //                 sleep_quality_rating: record.sleep_quality_rating || '',
-    //                 notes: record.notes || ''
-    //             });
-    //         } else {
-    //             setFormData(sleepService.getDefaultSleepRecord());
-    //         }
-    //     } catch (error) {
-    //         console.error('Failed to load sleep record:', error);
-    //         setFormData(sleepService.getDefaultSleepRecord());
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
-
     // Debounced save delegates exclusively to saveSleepRecord as required
     const debouncedSave = (data, instant) => {
         if (saveTimeoutRef.current) {
@@ -183,10 +133,6 @@ function SleepPage({ onBack }) {
         setFormData(updatedData);
         debouncedSave(updatedData, false);
     };
-
-    // useEffect(() => {
-    //     loadSleepRecord();
-    // }, [currentDate, sleepService]);
 
     useEffect(() => {
         return () => {
