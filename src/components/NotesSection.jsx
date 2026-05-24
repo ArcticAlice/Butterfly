@@ -28,6 +28,7 @@ const styles = {
         width: '100%', border: 'none', outline: 'none', 
         fontSize: '16px', color: colors.first, resize: 'none', 
         padding: '15px', boxSizing: 'border-box', borderRadius: '24px',
+        height: '100%'
     },
     saveStatus: { 
         position: 'absolute', bottom: '20px', right: '30px', 
