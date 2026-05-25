@@ -166,8 +166,6 @@ function DietPage({ onBack }) {
         debouncedSave(updatedData, false);
     };
 
-    if (loading) return <div>Loading...</div>;
-
     return (
         <div style={styles.container}>
             <PageHeader onBack={onBack} />
