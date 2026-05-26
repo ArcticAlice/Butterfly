@@ -8,8 +8,7 @@ import { colors, typography, spacing } from '../utils/theme';
 import { getSleepService } from "../utils/dataFunctions";
 import { formatTime } from '../utils/helperFunctions';
 
-function SleepPage({ onBack }) {
-    const [currentDate, setCurrentDate] = useState(new Date());
+function SleepPage({ onBack, currentDate, setCurrentDate }) {
     const [saveStatus, setSaveStatus] = useState('idle');
     const [loading, setLoading] = useState(true);
     const [sleepService, setSleepService] = useState(null);
@@ -57,6 +56,9 @@ function SleepPage({ onBack }) {
                 }
             } catch (error) {
                 console.error('Failed to initialize sleep page:', error);
+                if (sleepService) {
+                    setFormData(sleepService.getDefaultSleepRecord());
+                }
             } finally {
                 if (mounted) {
                     setLoading(false);
@@ -212,7 +214,6 @@ function SleepPage({ onBack }) {
                                             onChange={(e) => handleTempChange('sleep_start_time', e.target.value)}
                                             onKeyPress={(e) => handleKeyPress(e, 'sleep_start_time')}
                                             style={styles.timeInputFull}
-                                            autoFocus
                                             onBlur={() => saveField('sleep_start_time', true)}
                                         />
                                     ) : (
@@ -233,7 +234,6 @@ function SleepPage({ onBack }) {
                                             onChange={(e) => handleTempChange('sleep_end_time', e.target.value)}
                                             onKeyPress={(e) => handleKeyPress(e, 'sleep_end_time')}
                                             style={styles.timeInputFull}
-                                            autoFocus
                                             onBlur={() => saveField('sleep_end_time', true)}
                                         />
                                     ) : (
@@ -264,7 +264,6 @@ function SleepPage({ onBack }) {
                                             onChange={(e) => handleTempChange(field, e.target.value)}
                                             onKeyPress={(e) => handleKeyPress(e, field)}
                                             style={styles.durationInput}
-                                            autoFocus
                                             onBlur={() => saveField(field, true)}
                                         />
                                     ) : (

@@ -7,8 +7,7 @@ import Template from '../components/Template';
 import { colors, typography, spacing } from '../utils/theme';
 import { getFoodService } from "../utils/dataFunctions";
 
-function DietPage({ onBack }) {
-    const [currentDate, setCurrentDate] = useState(new Date());
+function DietPage({ onBack, currentDate, setCurrentDate }) {
     const [saveStatus, setSaveStatus] = useState('idle');
     const [formData, setFormData] = useState({ food_info: {}, notes: '' });
     const [newFoodName, setNewFoodName] = useState('');
@@ -40,7 +39,7 @@ function DietPage({ onBack }) {
 
                 setFoodService(service)
 
-                const record = await foodService.getFoodRecord(currentDate);
+                const record = await service.getFoodRecord(currentDate);
                 if (!mounted) return;
 
                 if (record) {
@@ -49,13 +48,17 @@ function DietPage({ onBack }) {
                         notes: record.notes || ''
                     });
                 } else {
-                    setFormData(foodService.getDefaultFoodRecord());
+                    setFormData(service.getDefaultFoodRecord());
                 }
             } catch (error) {
                 console.error('Failed to load food record:', error);
-                setFormData(foodService.getDefaultFoodRecord());
+                if (foodService) {
+                    setFormData(foodService.getDefaultFoodRecord());
+                }
             } finally {
-                setLoading(false);
+                if (mounted) {
+                    setLoading(false);
+                }
             }
 
         }
@@ -171,12 +174,24 @@ function DietPage({ onBack }) {
             <PageHeader onBack={onBack} />
 
             <div style={styles.content}>
+                
                 <DateNavigator
                     currentDate={currentDate}
-                    onPrevious={() => setCurrentDate(prev => new Date(new Date(prev).setDate(prev.getDate() - 1)))}
-                    onNext={() => setCurrentDate(prev => new Date(new Date(prev).setDate(prev.getDate() + 1)))}
+                    onPrevious={() =>
+                        setCurrentDate(prev => {
+                            const newDate = new Date(prev);
+                            newDate.setDate(newDate.getDate() - 1);
+                            return newDate;
+                        })
+                    }
+                    onNext={() =>
+                        setCurrentDate(prev => {
+                            const newDate = new Date(prev);
+                            newDate.setDate(newDate.getDate() + 1);
+                            return newDate;
+                        })
+                    }
                 />
-
                 <div style={styles.mainGrid}>
                     {/* Left Column: Calorie Goal & Macros */}
                     <div style={styles.leftCol}>
