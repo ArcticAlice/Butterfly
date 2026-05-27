@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PageHeader from '../components/PageHeader';
 import NotesSection from '../components/NotesSection';
+import DateNavigator from '../components/DateNavigator';
 import { colors, typography, spacing } from '../utils/theme';
 
 function BloodWorkPage({ onBack }) {
@@ -29,7 +30,7 @@ function BloodWorkPage({ onBack }) {
 
         setSaveStatus('saving');
         saveTimeoutRef.current = setTimeout(() => {
-            setSaveStatus('idle'); 
+            setSaveStatus('idle');
         }, 2000);
     };
 
@@ -46,7 +47,6 @@ function BloodWorkPage({ onBack }) {
         </div>
     );
 
-    // ========== RETURN STATEMENT ==========
     return (
         <div style={styles.container}>
             <PageHeader onBack={onBack} />
@@ -54,8 +54,8 @@ function BloodWorkPage({ onBack }) {
             <div style={styles.content}>
                 {/* Unique Lab Report Navigator */}
                 <div style={styles.navigator}>
-                    <button 
-                        onClick={() => setReportIndex(Math.max(1, reportIndex - 1))} 
+                    <button
+                        onClick={() => setReportIndex(Math.max(1, reportIndex - 1))}
                         style={styles.navArrow}
                     >
                         ‹
@@ -64,8 +64,8 @@ function BloodWorkPage({ onBack }) {
                         <div style={styles.navTitle}>Lab Report {reportIndex}</div>
                         <div style={styles.navDate}>October 24, 2023</div>
                     </div>
-                    <button 
-                        onClick={() => setReportIndex(reportIndex + 1)} 
+                    <button
+                        onClick={() => setReportIndex(reportIndex + 1)}
                         style={styles.navArrow}
                     >
                         ›
@@ -101,8 +101,6 @@ function BloodWorkPage({ onBack }) {
 
                     <div style={styles.notesWrapper}>
                         <NotesSection
-                            label="CLINICAL NOTES"
-                            placeholder="Enter any specific notes from your physician or personal observations about this lab draw..."
                             value={formData.notes}
                             onChange={(val) => handleFieldChange('notes', val)}
                             saveStatus={saveStatus}
@@ -115,9 +113,32 @@ function BloodWorkPage({ onBack }) {
 }
 
 const styles = {
-    container: { minHeight: '100vh', backgroundColor: '#F8FAFC', paddingBottom: spacing.xxl },
-    content: { maxWidth: '850px', margin: '0 auto', padding: spacing.xl },
-    
+    container: {
+        height: '100vh',
+        width: '100vw',
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+    },
+    content: {
+        width: '60%',
+        height: '93%',
+        position: 'absolute',
+        bottom: '0',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        display: 'grid',
+        gridTemplateRows: '.1fr 1fr .8fr',
+        gap: '2%',
+        boxSizing: 'border-box',
+        paddingTop: '2%',
+    },
+    mainGrid: {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1.5fr',
+        gap: spacing.xl,
+        width: '100%',
+    },
+
     // Navigator Styles
     navigator: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '40px', marginBottom: '40px' },
     navArrow: { background: 'none', border: 'none', fontSize: '32px', color: '#1E293B', cursor: 'pointer', paddingBottom: '4px' },
@@ -126,25 +147,24 @@ const styles = {
     navDate: { fontSize: '11px', color: '#94A3B8', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' },
 
     // Card Styles
-    reportCard: { 
-        backgroundColor: colors.surface, borderRadius: '24px', padding: '48px', 
-        boxShadow: '0 4px 25px rgba(0,0,0,0.03)', position: 'relative' 
+    reportCard: {
+        backgroundColor: colors.card, borderRadius: '24px', padding: '48px', position: 'relative'
     },
     cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '48px' },
     cardTitle: { fontSize: '28px', fontWeight: 'bold', color: '#1E293B', margin: 0 },
-    statusPill: { 
-        backgroundColor: '#ECFDF5', color: colors.secondary, fontSize: '10px', 
-        fontWeight: 'bold', padding: '6px 12px', borderRadius: '12px', letterSpacing: '0.5px' 
+    statusPill: {
+        backgroundColor: '#ECFDF5', color: colors.secondary, fontSize: '10px',
+        fontWeight: 'bold', padding: '6px 12px', borderRadius: '12px', letterSpacing: '0.5px'
     },
 
     panelsGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '60px' },
     sectionHeader: { fontSize: '10px', fontWeight: 'bold', color: colors.secondary, marginBottom: '24px', letterSpacing: '1px' },
-    
+
     inputContainer: { marginBottom: '20px' },
     inputLabel: { display: 'block', fontSize: '12px', fontWeight: '600', color: '#1E293B', marginBottom: '8px' },
-    customInput: { 
-        width: '100%', backgroundColor: '#F1F5F9', border: 'none', borderRadius: '12px', 
-        padding: '14px 16px', fontSize: '14px', color: '#94A3B8', outline: 'none' 
+    customInput: {
+        width: '100%', backgroundColor: '#F1F5F9', border: 'none', borderRadius: '12px',
+        padding: '14px 16px', fontSize: '14px', color: '#94A3B8', outline: 'none'
     },
 
     notesWrapper: { borderTop: '1px solid #F1F5F9', marginTop: '40px', paddingTop: '10px' }

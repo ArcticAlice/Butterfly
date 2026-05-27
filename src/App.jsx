@@ -5,15 +5,15 @@ import './App.css';
 import AuthPage from './pages/AuthPage';
 import DashboardPage from './pages/DashboardPage';
 import SleepPage from './pages/SleepPage';
-import WorkoutPage from './pages/WorkoutPage';
 import DietPage from './pages/DietPage';
-import HealthMetricsPage from './pages/HealthMetricsPage';
+import Vitals from './pages/VitalsPage';
 import BloodWorkPage from './pages/BloodWorkPage';
 
 function App() {
   // ========== LOGIC SECTION ==========
   const [currentPage, setCurrentPage] = useState('auth');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const handleAuthenticate = () => {
     setIsAuthenticated(true);
@@ -35,26 +35,24 @@ function App() {
 
     switch (currentPage) {
       case 'dashboard':
-        return <DashboardPage onNavigate={navigateTo} />;
+        return <DashboardPage onNavigate={navigateTo} currentDate={currentDate} setCurrentDate={setCurrentDate}/>;
       case 'sleep':
-        return <SleepPage onBack={navigateBack} />;
-      case 'workout':
-        return <WorkoutPage onBack={navigateBack} />;
+        return <SleepPage onBack={navigateBack} currentDate={currentDate} setCurrentDate={setCurrentDate}/>;
       case 'diet':
-        return <DietPage onBack={navigateBack} />;
-      case 'health-metrics':
-        return <HealthMetricsPage onBack={navigateBack} />;
+        return <DietPage onBack={navigateBack} currentDate={currentDate} setCurrentDate={setCurrentDate}/>;
+      case 'vitals':
+        return <Vitals onBack={navigateBack} currentDate={currentDate} setCurrentDate={setCurrentDate}/>;
       case 'blood-work':
-        return <BloodWorkPage onBack={navigateBack} />;
+        return <BloodWorkPage onBack={navigateBack}/>;
       default:
-        return <DashboardPage onNavigate={navigateTo} />;
+        return <DashboardPage onNavigate={navigateTo} currentDate={currentDate} setCurrentDate={setCurrentDate}/>;
     }
   };
 
   // ========== RETURN STATEMENT ==========
   return (
       renderPage()
-    // <DietPage/>
+      // <Vitals/>
   );
 }
 
