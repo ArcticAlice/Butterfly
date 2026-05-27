@@ -4,9 +4,6 @@ import DateNavigator from '../components/DateNavigator';
 
 function DashboardPage({ onNavigate, currentDate, setCurrentDate }) {
 
-    // Fake Data for Sleep Histogram
-    const sleepData = [40, 60, 45, 80, 55, 70, 65];
-
     return (
         <div style={styles.container}>
             <PageHeader />
@@ -37,7 +34,7 @@ function DashboardPage({ onNavigate, currentDate, setCurrentDate }) {
                     <div style={styles.card} onClick={() => onNavigate('sleep')}>
                         <div style={styles.cardHeader}>
                             <div>
-                                <h3 style={styles.cardTitle}>Sleep</h3>
+                                <p>Sleep</p>
                             </div>
                         </div>
                     </div>
@@ -56,7 +53,7 @@ function DashboardPage({ onNavigate, currentDate, setCurrentDate }) {
 
                 {/* Bottom Section: Blood Work */}
                 <div style={styles.bloodWorkCard} onClick={() => onNavigate('blood-work')}>
-                    <h3 style={styles.cardTitle}>Blood Work</h3>
+                    <p>Blood Work</p>
                 </div>
             </div>
         </div>
@@ -89,10 +86,8 @@ const styles = {
         backgroundColor: colors.card, borderRadius: '16px', padding: spacing.lg, cursor: 'pointer'
     },
     cardHeader: { display: 'flex', justifyContent: 'space-between', marginBottom: spacing.lg },
-    cardTitle: { ...typography.h3, margin: 0 },
     metricsColumn: { display: 'flex', flexDirection: 'column', gap: spacing.md },
     smallCard: { backgroundColor: colors.card, borderRadius: '16px', padding: spacing.md, cursor: 'pointer', flex: '1' },
-    metricValue: { ...typography.h2, margin: 0 },
 
     bloodWorkCard: { backgroundColor: colors.card, borderRadius: '16px', padding: spacing.lg, cursor: 'pointer' },
 };

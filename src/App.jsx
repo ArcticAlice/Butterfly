@@ -43,7 +43,7 @@ function App() {
       case 'vitals':
         return <Vitals onBack={navigateBack} currentDate={currentDate} setCurrentDate={setCurrentDate}/>;
       case 'blood-work':
-        return <BloodWorkPage onBack={navigateBack} currentDate={currentDate} setCurrentDate={setCurrentDate}/>;
+        return <BloodWorkPage onBack={navigateBack}/>;
       default:
         return <DashboardPage onNavigate={navigateTo} currentDate={currentDate} setCurrentDate={setCurrentDate}/>;
     }
