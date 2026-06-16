@@ -5,7 +5,7 @@ import NotesSection from '../components/NotesSection';
 import { colors, typography, spacing } from '../utils/theme';
 import { getVitalsService } from '../utils/dataFunctions';
 
-function MetricInput({ label, value, unit, target, field, changeFunction, saveField }) {
+function MetricInput({ label, value, unit, target, field, changeFunction, saveField, keydown }) {
     return (
         <div style={styles.metricContainer}>
             <p style={styles.metricLabel}>{label}</p>
@@ -14,6 +14,7 @@ function MetricInput({ label, value, unit, target, field, changeFunction, saveFi
                     type="text"
                     value={value}
                     onChange={(e) => changeFunction(field, e.target.value)}
+                    onKeyPress={(e) => keydown(e, e.target.value)}
                     style={styles.customInput}
                     onBlur={() => saveField(field, true)}
                 />
@@ -161,6 +162,12 @@ function VitalsPage({ onBack, currentDate, setCurrentDate }) {
         debouncedSave(updatedData, false);
     };
 
+    const handleKeyPress = (e, field) => {
+        if (e.key === 'Enter') {
+            saveField(field, true);
+        }
+    };
+
     // ========== RETURN STATEMENT ==========
     return (
         <div style={styles.container}>
@@ -189,51 +196,57 @@ function VitalsPage({ onBack, currentDate, setCurrentDate }) {
                 <div style={styles.mainGrid}>
                     <div style={styles.summaryCard}>
                         <MetricInput
-                            label="Blood Oxygen" 
+                            label="Blood Oxygen"
                             field="blood_oxygen"
-                            value={formData.blood_oxygen} 
-                            unit="SpO2" 
+                            value={formData.blood_oxygen}
+                            unit="SpO2"
                             changeFunction={handleFieldChange}
+                            keydown={handleKeyPress}
                             saveField={saveField}
                         />
                         <MetricInput
-                            label="Resting Heart Rate" 
+                            label="Resting Heart Rate"
                             field="resting_heart_rate"
-                            value={formData.resting_heart_rate} 
-                            unit="bpm" 
+                            value={formData.resting_heart_rate}
+                            unit="bpm"
                             changeFunction={handleFieldChange}
+                            keydown={handleKeyPress}
                             saveField={saveField}
                         />
                         <MetricInput
-                            label="Heart Rate Low" 
+                            label="Heart Rate Low"
                             field="heart_rate_low"
-                            value={formData.heart_rate_low} 
-                            unit="bpm" 
+                            value={formData.heart_rate_low}
+                            unit="bpm"
                             changeFunction={handleFieldChange}
+                            keydown={handleKeyPress}
                             saveField={saveField}
                         />
                         <MetricInput
-                            label="Heart Rate High" 
+                            label="Heart Rate High"
                             field="heart_rate_high"
-                            value={formData.heart_rate_high} 
-                            unit="bpm" 
+                            value={formData.heart_rate_high}
+                            unit="bpm"
                             changeFunction={handleFieldChange}
+                            keydown={handleKeyPress}
                             saveField={saveField}
                         />
                         <MetricInput
-                            label="Heart Rate Variability" 
+                            label="Heart Rate Variability"
                             field="heart_rate_variability"
-                            value={formData.heart_rate_variability} 
-                            unit="ms" 
+                            value={formData.heart_rate_variability}
+                            unit="ms"
                             changeFunction={handleFieldChange}
+                            keydown={handleKeyPress}
                             saveField={saveField}
                         />
                         <MetricInput
-                            label="Breathing Rate" 
+                            label="Breathing Rate"
                             field="breathing_rate"
-                            value={formData.breathing_rate} 
+                            value={formData.breathing_rate}
                             unit="BR/M"
                             changeFunction={handleFieldChange}
+                            keydown={handleKeyPress}
                             saveField={saveField}
                         />
 
@@ -245,38 +258,43 @@ function VitalsPage({ onBack, currentDate, setCurrentDate }) {
                             value={formData.blood_pressure}
                             unit="mmHg"
                             changeFunction={handleFieldChange}
+                            keydown={handleKeyPress}
                             saveField={saveField}
                         />
                         <MetricInput
-                            label="Body Fat Percentage" 
+                            label="Body Fat Percentage"
                             field="body_fate_percentage"
-                            value={formData.body_fat_percentage} 
+                            value={formData.body_fat_percentage}
                             unit="MS"
                             changeFunction={handleFieldChange}
+                            keydown={handleKeyPress}
                             saveField={saveField}
                         />
                         <MetricInput
-                            label="Body Weight" 
+                            label="Body Weight"
                             field="body_weight"
-                            value={formData.body_weight} 
+                            value={formData.body_weight}
                             unit="%"
                             changeFunction={handleFieldChange}
+                            keydown={handleKeyPress}
                             saveField={saveField}
                         />
                         <MetricInput
-                            label="Oxygen Saturation" 
+                            label="Oxygen Saturation"
                             field="oxygen_saturation"
-                            value={formData.oxygen_saturation} 
+                            value={formData.oxygen_saturation}
                             unit="%"
                             changeFunction={handleFieldChange}
+                            keydown={handleKeyPress}
                             saveField={saveField}
                         />
                         <MetricInput
-                            label="Skin Temp Var" 
+                            label="Skin Temp Var"
                             field="skin_temperature_variation"
-                            value={formData.skin_temperature_variation} 
+                            value={formData.skin_temperature_variation}
                             unit="°C"
                             changeFunction={handleFieldChange}
+                            keydown={handleKeyPress}
                             saveField={saveField}
                         />
                     </div>
