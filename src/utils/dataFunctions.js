@@ -42,7 +42,7 @@ class Sleep {
                     WHERE date = $9`,
                     [
                         sleepData.sleep_start_time, sleepData.sleep_end_time, sleepData.rem_sleep_duration,
-                        sleepData.deep_sleep_duration, sleepData.light_sleep_duration, sleepData.awake_duration,
+                        sleepData.deep_sleep_duration, sleepData.light_sleep_duration, sleepData.awake_duration, 
                         sleepData.sleep_quality_rating, sleepData.notes, dateString
                     ]
                 );

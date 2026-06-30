@@ -16,6 +16,10 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
     const [editingFields, setEditingFields] = useState({});
     const [tempValues, setTempValues] = useState({});
     const saveTimeoutRef = useRef(null);
+    const notesRef = useRef('');
+    const sleepServiceRef = useRef(null);
+    const formDataRef = useRef({});
+    const inputRefs = useRef({}); // ADD: holds DOM nodes for each field's input
 
     // Safely compute totals with fallback values to prevent NaN render errors
     const totalSleepMins =
@@ -70,79 +74,98 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
 
         return () => {
             mounted = false;
+            if (saveTimeoutRef.current) {
+                clearTimeout(saveTimeoutRef.current);
+            }
+
         };
     }, [currentDate]);
 
-    // Debounced save delegates exclusively to saveSleepRecord as required
-    const debouncedSave = (data, instant) => {
-        if (saveTimeoutRef.current) {
-            clearTimeout(saveTimeoutRef.current);
-        }
+    useEffect(() => {
+        formDataRef.current = formData;
+    }, [formData]);
 
-        setSaveStatus('saving');
-        const time = instant ? 500 : 3500;
+    useEffect(() => {
+        sleepServiceRef.current = sleepService;
+    }, [sleepService]);
 
-        saveTimeoutRef.current = setTimeout(async () => {
-            if (!sleepService) return;
+    useEffect(() => {
+        if (!sleepServiceRef.current) return;
 
+        const interval = setInterval(async () => {
             try {
-                await sleepService.saveSleepRecord(currentDate, data);
-                setSaveStatus('saved');
-                setTimeout(() => setSaveStatus('idle'), 1000);
+                const updatedData = {
+                    ...formDataRef.current, // safe snapshot for non-notes fields
+                    notes: notesRef.current
+                };
+
+                await sleepServiceRef.current.saveSleepRecord(currentDate, updatedData);
             } catch (error) {
                 console.error('Failed to save sleep record:', error);
-                setSaveStatus('error');
-                setTimeout(() => setSaveStatus('idle'), 1000);
             }
-        }, time);
-    };
+        }, 3000);
+
+        return () => clearInterval(interval);
+    }, [currentDate, sleepService]);
+
+    // ADD: focus whichever field just entered edit mode
+    useEffect(() => {
+        const activeField = Object.keys(editingFields).find((f) => editingFields[f]);
+        if (activeField && inputRefs.current[activeField]) {
+            inputRefs.current[activeField].focus();
+        }
+    }, [editingFields]);
 
     const startEditing = (field) => {
         setTempValues(prev => ({ ...prev, [field]: formData[field] }));
         setEditingFields(prev => ({ ...prev, [field]: true }));
     };
 
-    const saveField = (field, instant = false, directValue = null) => {
-        const rawValue = directValue !== null ? directValue : tempValues[field];
-        const textFields = ['notes', 'sleep_start_time', 'sleep_end_time'];
-        const formattedValue = textFields.includes(field) ? rawValue : rawValue === '' ? 0 : Number(rawValue);
+    const saveField = async (event, field) => {
+        let latestValue = event.target.value;
+        const nonNumbers = ["notes", "sleep_start_time", "sleep_end_time"];
+        if (!nonNumbers.includes(field)) {
+            const parsed = Number(latestValue);
+            latestValue = Number.isFinite(parsed) ? parsed : 0;
+        }
 
         const updatedData = {
             ...formData,
-            [field]: formattedValue
+            [field]: latestValue
         };
 
         setFormData(updatedData);
         setEditingFields(prev => ({ ...prev, [field]: false }));
-        debouncedSave(updatedData, instant);
-    };
 
-    const handleTempChange = (field, value) => {
-        setTempValues(prev => ({
-            ...prev,
-            [field]: value === '' ? '' : value
-        }));
-    };
+        if (!sleepService) return;
+
+        try {
+            await sleepService.saveSleepRecord(currentDate, updatedData);
+            console.log("information saved");
+        } catch (error) {
+            console.error('Failed to save sleep record:', error);
+        }
+    }
 
     const handleKeyPress = (e, field) => {
         if (e.key === 'Enter') {
-            saveField(field, true);
+            saveField(e, field);
         }
     };
 
     const handleNotesChange = (value) => {
-        const updatedData = { ...formData, notes: value };
-        setFormData(updatedData);
-        debouncedSave(updatedData, false);
+        notesRef.current = value;
+        setFormData(prev => ({ ...prev, notes: value }));
     };
 
-    useEffect(() => {
-        return () => {
-            if (saveTimeoutRef.current) {
-                clearTimeout(saveTimeoutRef.current);
-            }
-        };
-    }, []);
+    const handleTempChange = (field) => (e) => {
+        const value = e.target.value;
+
+        setTempValues(prev => ({
+            ...prev,
+            [field]: value
+        }));
+    };
 
     const sleepStages = [
         { field: 'rem_sleep_duration', label: 'REM', color: colors.first },
@@ -210,11 +233,12 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
                                     {editingFields.sleep_start_time ? (
                                         <input
                                             type="text"
+                                            ref={(el) => (inputRefs.current.sleep_start_time = el)}
                                             value={tempValues.sleep_start_time}
-                                            onChange={(e) => handleTempChange('sleep_start_time', e.target.value)}
-                                            onKeyPress={(e) => handleKeyPress(e, 'sleep_start_time')}
+                                            onChange={handleTempChange("sleep_start_time")}
+                                            onKeyDown={(e) => handleKeyPress(e, 'sleep_start_time')}
+                                            onBlur={(e) => saveField(e, 'sleep_start_time')}
                                             style={styles.timeInputFull}
-                                            onBlur={() => saveField('sleep_start_time', true)}
                                         />
                                     ) : (
                                         <span style={styles.fieldValueText}>
@@ -230,11 +254,12 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
                                     {editingFields.sleep_end_time ? (
                                         <input
                                             type="text"
+                                            ref={(el) => (inputRefs.current.sleep_end_time = el)}
                                             value={tempValues.sleep_end_time}
-                                            onChange={(e) => handleTempChange('sleep_end_time', e.target.value)}
-                                            onKeyPress={(e) => handleKeyPress(e, 'sleep_end_time')}
+                                            onChange={handleTempChange("sleep_end_time")}
+                                            onKeyDown={(e) => handleKeyPress(e, 'sleep_end_time')}
+                                            onBlur={(e) => saveField(e, 'sleep_end_time')}
                                             style={styles.timeInputFull}
-                                            onBlur={() => saveField('sleep_end_time', true)}
                                         />
                                     ) : (
                                         <span style={styles.fieldValueText}>
@@ -259,20 +284,18 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
                                     {editingFields[field] ? (
                                         <input
                                             type="text"
-                                            inputMode="numeric"
+                                            ref={(el) => (inputRefs.current[field] = el)}
                                             value={tempValues[field] ?? ''}
-                                            onChange={(e) => handleTempChange(field, e.target.value)}
-                                            onKeyPress={(e) => handleKeyPress(e, field)}
+                                            onChange={handleTempChange(field)}
+                                            onKeyDown={(e) => handleKeyPress(e, field)}
+                                            onBlur={(e) => saveField(e, field)}
                                             style={styles.durationInput}
-                                            onBlur={() => saveField(field, true)}
                                         />
                                     ) : (
                                         <span style={styles.stageValue}>{formatTime(formData[field])}</span>
                                     )}
                                     {!editingFields[field] && (
-                                        <div onClick={() => startEditing(field)}>
-                                            <Pencil width='15px' height='15px' />
-                                        </div>
+                                        <Pencil width='15px' height='15px' onClick={() => startEditing(field)} />
                                     )}
                                 </div>
                             ))}
@@ -284,7 +307,6 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
                     value={formData.notes}
                     onChange={handleNotesChange}
                     saveStatus={saveStatus}
-                    saveField={saveField}
                 />
             </div>
         </div>
