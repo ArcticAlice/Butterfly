@@ -2,7 +2,7 @@ import Database from '@tauri-apps/plugin-sql';
 import { formatDateForDB } from './helperFunctions';
 
 // Ensures both Sleep and Food point to the exact same DB file defined in lib.rs
-const DB_NAME = 'sqlite:butterfly.db';
+const DB_NAME = 'sqlite:butterflyTemp.db';
 
 class Sleep {
     constructor(db) {
@@ -42,7 +42,7 @@ class Sleep {
                     WHERE date = $9`,
                     [
                         sleepData.sleep_start_time, sleepData.sleep_end_time, sleepData.rem_sleep_duration,
-                        sleepData.deep_sleep_duration, sleepData.light_sleep_duration, sleepData.awake_duration,
+                        sleepData.deep_sleep_duration, sleepData.light_sleep_duration, sleepData.awake_duration, 
                         sleepData.sleep_quality_rating, sleepData.notes, dateString
                     ]
                 );
