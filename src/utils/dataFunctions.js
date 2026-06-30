@@ -2,7 +2,7 @@ import Database from '@tauri-apps/plugin-sql';
 import { formatDateForDB } from './helperFunctions';
 
 // Ensures both Sleep and Food point to the exact same DB file defined in lib.rs
-const DB_NAME = 'sqlite:butterflyTemp.db';
+const DB_NAME = 'sqlite:butterfly.db';
 
 class Sleep {
     constructor(db) {
