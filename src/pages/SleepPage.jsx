@@ -9,7 +9,6 @@ import { getSleepService } from "../utils/dataFunctions";
 import { formatTime } from '../utils/helperFunctions';
 
 function SleepPage({ onBack, currentDate, setCurrentDate }) {
-    const [saveStatus, setSaveStatus] = useState('idle');
     const [loading, setLoading] = useState(true);
     const [sleepService, setSleepService] = useState(null);
     const [formData, setFormData] = useState({});
@@ -246,7 +245,7 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
                                         </span>
                                     )}
                                     {!editingFields.sleep_start_time && (
-                                        <Pencil width='15px' height='15px' onClick={() => startEditing('sleep_start_time')} />
+                                        <Pencil onClick={() => startEditing('sleep_start_time')} />
                                     )}
                                 </div>
 
@@ -267,7 +266,7 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
                                         </span>
                                     )}
                                     {!editingFields.sleep_end_time && (
-                                        <Pencil width='15px' height='15px' onClick={() => startEditing('sleep_end_time')} />
+                                        <Pencil onClick={() => startEditing('sleep_end_time')} />
                                     )}
                                 </div>
                             </div>
@@ -295,7 +294,7 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
                                         <span style={styles.stageValue}>{formatTime(formData[field])}</span>
                                     )}
                                     {!editingFields[field] && (
-                                        <Pencil width='15px' height='15px' onClick={() => startEditing(field)} />
+                                        <Pencil onClick={() => startEditing(field)} />
                                     )}
                                 </div>
                             ))}
@@ -306,7 +305,6 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
                 <NotesSection
                     value={formData.notes}
                     onChange={handleNotesChange}
-                    saveStatus={saveStatus}
                 />
             </div>
         </div>

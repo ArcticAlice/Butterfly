@@ -5,7 +5,7 @@ import NotesSection from '../components/NotesSection';
 import { colors, typography, spacing } from '../utils/theme';
 import { getVitalsService } from '../utils/dataFunctions';
 
-function MetricInput({ label, value, unit, target, field, changeFunction, saveField, keydown }) {
+function MetricInput({ label, value, unit, field, changeFunction, saveField, keydown }) {
     return (
         <div style={styles.metricContainer}>
             <p style={styles.metricLabel}>{label}</p>
@@ -13,39 +13,25 @@ function MetricInput({ label, value, unit, target, field, changeFunction, saveFi
                 <input
                     type="text"
                     value={value}
-                    onChange={(e) => changeFunction(field, e.target.value)}
-                    onKeyPress={(e) => keydown(e, e.target.value)}
+                    onChange={(e) => changeFunction(e, field)}
+                    onKeyDown={(e) => keydown(e, field)}
+                    onBlur={(e) => saveField(e, field)}
                     style={styles.customInput}
-                    onBlur={() => saveField(field, true)}
                 />
                 <span style={styles.unitText}>{unit}</span>
             </div>
-            <div style={styles.targetText}>{target}</div>
         </div>
     )
 };
 
 function VitalsPage({ onBack, currentDate, setCurrentDate }) {
-    const [saveStatus, setSaveStatus] = useState('idle');
     const [loading, setLoading] = useState(true);
     const [vitalsService, setVitalsService] = useState(null);
-
+    const [formData, setFormData] = useState({});
     const saveTimeoutRef = useRef(null);
-
-    const [formData, setFormData] = useState({
-        blood_oxygen: '',
-        resting_heart_rate: '',
-        heart_rate_low: '',
-        heart_rate_high: '',
-        heart_rate_variability: '',
-        breathing_rate: '',
-        blood_pressure: '',
-        body_fat_percentage: '',
-        body_weight: '',
-        oxygen_saturation: '',
-        skin_temperature_variation: '',
-        notes: '',
-    });
+    const notesRef = useRef('');
+    const vitalsServiceRef = useRef(null);
+    const formDataRef = useRef({});
 
     useEffect(() => {
         let mounted = true;
@@ -96,76 +82,74 @@ function VitalsPage({ onBack, currentDate, setCurrentDate }) {
 
         return () => {
             mounted = false;
-        };
-    }, [currentDate]);
-
-    useEffect(() => {
-        return () => {
             if (saveTimeoutRef.current) {
                 clearTimeout(saveTimeoutRef.current);
             }
         };
-    }, []);
+    }, [currentDate]);
 
-    const debouncedSave = (data, instant) => {
-        if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    useEffect(() => {
+        formDataRef.current = formData;
+    }, [formData]);
 
-        setSaveStatus('saving');
-        const time = instant ? 500 : 3500;
+    useEffect(() => {
+        vitalsServiceRef.current = vitalsService;
+    }, [vitalsService]);
 
-        saveTimeoutRef.current = setTimeout(async () => {
-            if (!vitalsService) return;
+    useEffect(() => {
+        if (!vitalsServiceRef.current) return;
 
+        const interval = setInterval(async () => {
             try {
-                await vitalsService.saveVitalsRecord(currentDate, data);
+                const updatedData = {
+                    ...formDataRef.current,
+                    notes: notesRef.current
+                };
 
-                setSaveStatus('saved');
-                setTimeout(() => setSaveStatus('idle'), 1000);
+                await vitalsServiceRef.current.saveVitalsRecord(currentDate, updatedData);
             } catch (error) {
                 console.error('Failed to save vitals record:', error);
-
-                setSaveStatus('error');
-                setTimeout(() => setSaveStatus('idle'), 1000);
             }
-        }, time);
-    };
+        }, 3000);
 
-    const saveField = (field, instant = false, directValue = null) => {
-        const rawValue = directValue !== null ? directValue : formData[field];
+        return () => clearInterval(interval);
+    }, [currentDate, vitalsService]);
+
+    const saveField = async (event, field) => {
+        let latestValue = event.target.value;
 
         const updatedData = {
             ...formData,
-            [field]: rawValue
+            [field]: latestValue
         };
 
         setFormData(updatedData);
-        debouncedSave(updatedData, instant);
-    };
 
-    const handleFieldChange = (field, value) => {
-        const updatedData = {
-            ...formData,
-            [field]: value
-        };
+        if (!vitalsService) return;
 
-        setFormData(updatedData);
-        debouncedSave(updatedData, true);
-    };
-
-    const handleNotesChange = (value) => {
-        const updatedData = {
-            ...formData,
-            notes: value
-        };
-
-        setFormData(updatedData);
-        debouncedSave(updatedData, false);
-    };
+        try {
+            await vitalsService.saveVitalsRecord(currentDate, updatedData);
+            console.log("information saved");
+        } catch (error) {
+            console.error('Failed to save vitals record:', error);
+        }
+    }
 
     const handleKeyPress = (e, field) => {
         if (e.key === 'Enter') {
-            saveField(field, true);
+            e.target.blur();
         }
+    };
+
+    const handleNotesChange = (value) => {
+        notesRef.current = value;
+        setFormData(prev => ({ ...prev, notes: value }));
+    };
+
+    // REPLACE handleTempChange
+    const handleTempChange = (e, field) => {
+        const value = e.target.value;
+        setFormData(prev => ({ ...prev, [field]: value }));
     };
 
     // ========== RETURN STATEMENT ==========
@@ -196,56 +180,56 @@ function VitalsPage({ onBack, currentDate, setCurrentDate }) {
                 <div style={styles.mainGrid}>
                     <div style={styles.summaryCard}>
                         <MetricInput
-                            label="Blood Oxygen"
-                            field="blood_oxygen"
-                            value={formData.blood_oxygen}
-                            unit="SpO2"
-                            changeFunction={handleFieldChange}
-                            keydown={handleKeyPress}
-                            saveField={saveField}
-                        />
-                        <MetricInput
-                            label="Resting Heart Rate"
-                            field="resting_heart_rate"
-                            value={formData.resting_heart_rate}
-                            unit="bpm"
-                            changeFunction={handleFieldChange}
-                            keydown={handleKeyPress}
-                            saveField={saveField}
-                        />
-                        <MetricInput
                             label="Heart Rate Low"
                             field="heart_rate_low"
-                            value={formData.heart_rate_low}
+                            value={formData.heart_rate_low ?? ''}
                             unit="bpm"
-                            changeFunction={handleFieldChange}
+                            changeFunction={handleTempChange}
                             keydown={handleKeyPress}
                             saveField={saveField}
                         />
                         <MetricInput
                             label="Heart Rate High"
                             field="heart_rate_high"
-                            value={formData.heart_rate_high}
+                            value={formData.heart_rate_high ?? ''}
                             unit="bpm"
-                            changeFunction={handleFieldChange}
+                            changeFunction={handleTempChange}
+                            keydown={handleKeyPress}
+                            saveField={saveField}
+                        />
+                        <MetricInput
+                            label="Resting Heart Rate"
+                            field="resting_heart_rate"
+                            value={formData.resting_heart_rate ?? ''}
+                            unit="bpm"
+                            changeFunction={handleTempChange}
                             keydown={handleKeyPress}
                             saveField={saveField}
                         />
                         <MetricInput
                             label="Heart Rate Variability"
                             field="heart_rate_variability"
-                            value={formData.heart_rate_variability}
+                            value={formData.heart_rate_variability ?? ''}
                             unit="ms"
-                            changeFunction={handleFieldChange}
+                            changeFunction={handleTempChange}
+                            keydown={handleKeyPress}
+                            saveField={saveField}
+                        />
+                        <MetricInput
+                            label="Blood Oxygen"
+                            field="blood_oxygen"
+                            value={formData.blood_oxygen ?? ''}
+                            unit="SpO2"
+                            changeFunction={handleTempChange}
                             keydown={handleKeyPress}
                             saveField={saveField}
                         />
                         <MetricInput
                             label="Breathing Rate"
                             field="breathing_rate"
-                            value={formData.breathing_rate}
-                            unit="BR/M"
-                            changeFunction={handleFieldChange}
+                            value={formData.breathing_rate ?? ''}
+                            unit="bprm"
+                            changeFunction={handleTempChange}
                             keydown={handleKeyPress}
                             saveField={saveField}
                         />
@@ -255,45 +239,45 @@ function VitalsPage({ onBack, currentDate, setCurrentDate }) {
                         <MetricInput
                             label="Blood Pressure"
                             field="blood_pressure"
-                            value={formData.blood_pressure}
+                            value={formData.blood_pressure ?? ''}
                             unit="mmHg"
-                            changeFunction={handleFieldChange}
+                            changeFunction={handleTempChange}
                             keydown={handleKeyPress}
                             saveField={saveField}
                         />
                         <MetricInput
                             label="Body Fat Percentage"
-                            field="body_fate_percentage"
-                            value={formData.body_fat_percentage}
+                            field="body_fat_percentage"
+                            value={formData.body_fat_percentage ?? ''}
                             unit="MS"
-                            changeFunction={handleFieldChange}
+                            changeFunction={handleTempChange}
                             keydown={handleKeyPress}
                             saveField={saveField}
                         />
                         <MetricInput
                             label="Body Weight"
                             field="body_weight"
-                            value={formData.body_weight}
+                            value={formData.body_weight ?? ''}
                             unit="%"
-                            changeFunction={handleFieldChange}
+                            changeFunction={handleTempChange}
                             keydown={handleKeyPress}
                             saveField={saveField}
                         />
                         <MetricInput
                             label="Oxygen Saturation"
                             field="oxygen_saturation"
-                            value={formData.oxygen_saturation}
+                            value={formData.oxygen_saturation ?? ''}
                             unit="%"
-                            changeFunction={handleFieldChange}
+                            changeFunction={handleTempChange}
                             keydown={handleKeyPress}
                             saveField={saveField}
                         />
                         <MetricInput
                             label="Skin Temp Var"
                             field="skin_temperature_variation"
-                            value={formData.skin_temperature_variation}
-                            unit="°C"
-                            changeFunction={handleFieldChange}
+                            value={formData.skin_temperature_variation ?? ''}
+                            unit="°F"
+                            changeFunction={handleTempChange}
                             keydown={handleKeyPress}
                             saveField={saveField}
                         />
@@ -302,8 +286,6 @@ function VitalsPage({ onBack, currentDate, setCurrentDate }) {
                 <NotesSection
                     value={formData.notes}
                     onChange={handleNotesChange}
-                    saveStatus={saveStatus}
-                    saveField={saveField}
                 />
             </div>
         </div>
@@ -376,9 +358,6 @@ const styles = {
     },
     unitText: {
         fontSize: '10px', fontWeight: 'bold', color: colors.first
-    },
-    targetText: {
-        fontSize: '10px', color: colors.first, marginTop: '6px', fontWeight: '500', textTransform: 'uppercase'
     },
 };
 
