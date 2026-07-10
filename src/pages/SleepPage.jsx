@@ -5,20 +5,21 @@ import NotesSection from '../components/NotesSection';
 import Gauge from '../assets/Guage';
 import Pencil from '../assets/Pencil';
 import { colors, typography, spacing } from '../utils/theme';
-import { getSleepService } from "../utils/dataFunctions";
+import { getService } from "../utils/dataFunctions";
 import { formatTime } from '../utils/helperFunctions';
 
 function SleepPage({ onBack, currentDate, setCurrentDate }) {
     const [loading, setLoading] = useState(true);
-    const [sleepService, setSleepService] = useState(null);
+    const [service, setService] = useState(null);
     const [formData, setFormData] = useState({});
     const [editingFields, setEditingFields] = useState({});
     const [tempValues, setTempValues] = useState({});
     const saveTimeoutRef = useRef(null);
     const notesRef = useRef('');
-    const sleepServiceRef = useRef(null);
+    const serviceRef = useRef(null);
     const formDataRef = useRef({});
     const inputRefs = useRef({}); // ADD: holds DOM nodes for each field's input
+        const hasChanged = useRef(false);
 
     // Safely compute totals with fallback values to prevent NaN render errors
     const totalSleepMins =
@@ -33,15 +34,12 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
 
         async function initialize() {
             try {
+                if (!mounted) return;
+
                 setLoading(true);
-
-                const service = await getSleepService();
-                if (!mounted) return;
-
-                setSleepService(service);
-
-                const record = await service.getSleepRecord(currentDate);
-                if (!mounted) return;
+                const s = await getService();
+                setService(s);
+                const record = await s.getRecord(currentDate, "sleep_records_v2");
 
                 if (record) {
                     setFormData({
@@ -55,13 +53,29 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
                         notes: record.notes || ''
                     });
                 } else {
-                    setFormData(service.getDefaultSleepRecord());
+                    setFormData({
+                        sleep_start_time: "",
+                        sleep_end_time: "",
+                        rem_sleep_duration: 0,
+                        deep_sleep_duration: 0,
+                        light_sleep_duration: 0,
+                        awake_duration: 0,
+                        sleep_quality_rating: "",
+                        notes: ""
+                    })
                 }
             } catch (error) {
                 console.error('Failed to initialize sleep page:', error);
-                if (sleepService) {
-                    setFormData(sleepService.getDefaultSleepRecord());
-                }
+                setFormData({
+                    sleep_start_time: "",
+                    sleep_end_time: "",
+                    rem_sleep_duration: 0,
+                    deep_sleep_duration: 0,
+                    light_sleep_duration: 0,
+                    awake_duration: 0,
+                    sleep_quality_rating: "",
+                    notes: ""
+                })
             } finally {
                 if (mounted) {
                     setLoading(false);
@@ -73,39 +87,34 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
 
         return () => {
             mounted = false;
-            if (saveTimeoutRef.current) {
-                clearTimeout(saveTimeoutRef.current);
-            }
-
         };
     }, [currentDate]);
 
     useEffect(() => {
         formDataRef.current = formData;
-    }, [formData]);
+        serviceRef.current = service;
+    }, [formData, service]);
 
     useEffect(() => {
-        sleepServiceRef.current = sleepService;
-    }, [sleepService]);
-
-    useEffect(() => {
-        if (!sleepServiceRef.current) return;
+        if (!serviceRef.current || loading) return;
 
         const interval = setInterval(async () => {
+            if (!hasChanged.current) return;
             try {
                 const updatedData = {
                     ...formDataRef.current, // safe snapshot for non-notes fields
                     notes: notesRef.current
                 };
 
-                await sleepServiceRef.current.saveSleepRecord(currentDate, updatedData);
+                await serviceRef.current.saveRecord(currentDate, updatedData, "_v2");
+                hasChanged.current = false;
             } catch (error) {
                 console.error('Failed to save sleep record:', error);
             }
         }, 3000);
 
         return () => clearInterval(interval);
-    }, [currentDate, sleepService]);
+    }, [currentDate, service, loading]);
 
     // ADD: focus whichever field just entered edit mode
     useEffect(() => {
@@ -122,7 +131,7 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
 
     const saveField = async (event, field) => {
         let latestValue = event.target.value;
-        const nonNumbers = ["notes", "sleep_start_time", "sleep_end_time"];
+        const nonNumbers = ["notes", "sleep_start_time", "sleep_end_time", "sleep_quality_rating"];
         if (!nonNumbers.includes(field)) {
             const parsed = Number(latestValue);
             latestValue = Number.isFinite(parsed) ? parsed : 0;
@@ -135,11 +144,16 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
 
         setFormData(updatedData);
         setEditingFields(prev => ({ ...prev, [field]: false }));
+        setTempValues(prev => {
+            const next = { ...prev };
+            delete next[field];
+            return next;
+        });
 
-        if (!sleepService) return;
+        if (!service) return;
 
         try {
-            await sleepService.saveSleepRecord(currentDate, updatedData);
+            await service.saveRecord(currentDate, updatedData, "sleep_records_v2");
             console.log("information saved");
         } catch (error) {
             console.error('Failed to save sleep record:', error);
@@ -148,12 +162,13 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
 
     const handleKeyPress = (e, field) => {
         if (e.key === 'Enter') {
-            saveField(e, field);
+            e.target.blur();
         }
     };
 
     const handleNotesChange = (value) => {
         notesRef.current = value;
+        hasChanged.current = true;
         setFormData(prev => ({ ...prev, notes: value }));
     };
 
@@ -228,7 +243,7 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
                             </div>
 
                             <div style={styles.valuesGrid}>
-                                <div style={{ ...styles.fieldValueRow, ...(editingFields.sleep_start_time) }}>
+                                <div style={styles.fieldValueRow}>
                                     {editingFields.sleep_start_time ? (
                                         <input
                                             type="text"
@@ -249,7 +264,7 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
                                     )}
                                 </div>
 
-                                <div style={{ ...styles.fieldValueRow, ...(editingFields.sleep_end_time) }}>
+                                <div style={styles.fieldValueRow}>
                                     {editingFields.sleep_end_time ? (
                                         <input
                                             type="text"

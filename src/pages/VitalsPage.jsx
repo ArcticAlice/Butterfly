@@ -3,7 +3,7 @@ import PageHeader from '../components/PageHeader';
 import DateNavigator from '../components/DateNavigator';
 import NotesSection from '../components/NotesSection';
 import { colors, typography, spacing } from '../utils/theme';
-import { getVitalsService } from '../utils/dataFunctions';
+import { getService } from '../utils/dataFunctions';
 
 function MetricInput({ label, value, unit, field, changeFunction, saveField, keydown }) {
     return (
@@ -26,12 +26,13 @@ function MetricInput({ label, value, unit, field, changeFunction, saveField, key
 
 function VitalsPage({ onBack, currentDate, setCurrentDate }) {
     const [loading, setLoading] = useState(true);
-    const [vitalsService, setVitalsService] = useState(null);
+    const [service, setService] = useState(null);
     const [formData, setFormData] = useState({});
     const saveTimeoutRef = useRef(null);
     const notesRef = useRef('');
-    const vitalsServiceRef = useRef(null);
+    const serviceRef = useRef(null);
     const formDataRef = useRef({});
+    const hasChanged = useRef(false);
 
     useEffect(() => {
         let mounted = true;
@@ -40,12 +41,12 @@ function VitalsPage({ onBack, currentDate, setCurrentDate }) {
             try {
                 setLoading(true);
 
-                const service = await getVitalsService();
+                const s = await getService();
                 if (!mounted) return;
 
-                setVitalsService(service);
+                setService(s);
 
-                const record = await service.getVitalsRecord(currentDate);
+                const record = await s.getRecord(currentDate, "vitals_records_v2");
                 if (!mounted) return;
 
                 if (record) {
@@ -64,13 +65,37 @@ function VitalsPage({ onBack, currentDate, setCurrentDate }) {
                         notes: record.notes || '',
                     });
                 } else {
-                    setFormData(service.getDefaultVitalsRecord());
+                    setFormData({
+                        blood_oxygen: '',
+                        resting_heart_rate: '',
+                        heart_rate_low: '',
+                        heart_rate_high: '',
+                        heart_rate_variability: '',
+                        breathing_rate: '',
+                        blood_pressure: '',
+                        body_fat_percentage: '',
+                        body_weight: '',
+                        oxygen_saturation: '',
+                        skin_temperature_variation: '',
+                        notes: '',
+                    });
                 }
             } catch (error) {
                 console.error('Failed to load vitals record:', error);
-                if (vitalsService) {
-                    setFormData(vitalsService.getDefaultVitalsRecord());
-                }
+                setFormData({
+                    blood_oxygen: '',
+                    resting_heart_rate: '',
+                    heart_rate_low: '',
+                    heart_rate_high: '',
+                    heart_rate_variability: '',
+                    breathing_rate: '',
+                    blood_pressure: '',
+                    body_fat_percentage: '',
+                    body_weight: '',
+                    oxygen_saturation: '',
+                    skin_temperature_variation: '',
+                    notes: '',
+                });
             } finally {
                 if (mounted) {
                     setLoading(false);
@@ -82,38 +107,34 @@ function VitalsPage({ onBack, currentDate, setCurrentDate }) {
 
         return () => {
             mounted = false;
-            if (saveTimeoutRef.current) {
-                clearTimeout(saveTimeoutRef.current);
-            }
         };
     }, [currentDate]);
 
     useEffect(() => {
         formDataRef.current = formData;
-    }, [formData]);
+        serviceRef.current = service;
+    }, [formData, service]);
 
     useEffect(() => {
-        vitalsServiceRef.current = vitalsService;
-    }, [vitalsService]);
-
-    useEffect(() => {
-        if (!vitalsServiceRef.current) return;
+        if (!serviceRef.current || loading) return;
 
         const interval = setInterval(async () => {
+            if (!hasChanged.current) return;
             try {
                 const updatedData = {
                     ...formDataRef.current,
                     notes: notesRef.current
                 };
 
-                await vitalsServiceRef.current.saveVitalsRecord(currentDate, updatedData);
+                await serviceRef.current.saveRecord(currentDate, updatedData, "vitals_records_v2");
+                hasChanged.current = false;
             } catch (error) {
                 console.error('Failed to save vitals record:', error);
             }
         }, 3000);
 
         return () => clearInterval(interval);
-    }, [currentDate, vitalsService]);
+    }, [currentDate, service, loading]);
 
     const saveField = async (event, field) => {
         let latestValue = event.target.value;
@@ -125,10 +146,10 @@ function VitalsPage({ onBack, currentDate, setCurrentDate }) {
 
         setFormData(updatedData);
 
-        if (!vitalsService) return;
+        if (!service) return;
 
         try {
-            await vitalsService.saveVitalsRecord(currentDate, updatedData);
+            await service.saveRecord(currentDate, updatedData, "vitals_records_v2");
             console.log("information saved");
         } catch (error) {
             console.error('Failed to save vitals record:', error);
@@ -143,10 +164,10 @@ function VitalsPage({ onBack, currentDate, setCurrentDate }) {
 
     const handleNotesChange = (value) => {
         notesRef.current = value;
+        hasChanged.current = true;
         setFormData(prev => ({ ...prev, notes: value }));
     };
 
-    // REPLACE handleTempChange
     const handleTempChange = (e, field) => {
         const value = e.target.value;
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -237,6 +258,24 @@ function VitalsPage({ onBack, currentDate, setCurrentDate }) {
                     </div>
                     <div style={styles.summaryCard}>
                         <MetricInput
+                            label="Skin Temp Var"
+                            field="skin_temperature_variation"
+                            value={formData.skin_temperature_variation ?? ''}
+                            unit="°F"
+                            changeFunction={handleTempChange}
+                            keydown={handleKeyPress}
+                            saveField={saveField}
+                        />
+                        <MetricInput
+                            label="Body Weight"
+                            field="body_weight"
+                            value={formData.body_weight ?? ''}
+                            unit="lb"
+                            changeFunction={handleTempChange}
+                            keydown={handleKeyPress}
+                            saveField={saveField}
+                        />
+                        <MetricInput
                             label="Blood Pressure"
                             field="blood_pressure"
                             value={formData.blood_pressure ?? ''}
@@ -255,28 +294,10 @@ function VitalsPage({ onBack, currentDate, setCurrentDate }) {
                             saveField={saveField}
                         />
                         <MetricInput
-                            label="Body Weight"
-                            field="body_weight"
-                            value={formData.body_weight ?? ''}
-                            unit="%"
-                            changeFunction={handleTempChange}
-                            keydown={handleKeyPress}
-                            saveField={saveField}
-                        />
-                        <MetricInput
                             label="Oxygen Saturation"
                             field="oxygen_saturation"
                             value={formData.oxygen_saturation ?? ''}
                             unit="%"
-                            changeFunction={handleTempChange}
-                            keydown={handleKeyPress}
-                            saveField={saveField}
-                        />
-                        <MetricInput
-                            label="Skin Temp Var"
-                            field="skin_temperature_variation"
-                            value={formData.skin_temperature_variation ?? ''}
-                            unit="°F"
                             changeFunction={handleTempChange}
                             keydown={handleKeyPress}
                             saveField={saveField}

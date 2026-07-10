@@ -5,21 +5,22 @@ import NotesSection from '../components/NotesSection';
 import Gauge from '../assets/Guage';
 import Template from '../components/Template';
 import { colors, typography, spacing } from '../utils/theme';
-import { getFoodService } from "../utils/dataFunctions";
+import { getService } from "../utils/dataFunctions";
 
 function DietPage({ onBack, currentDate, setCurrentDate }) {
-    const [saveStatus, setSaveStatus] = useState('idle');
-    const [formData, setFormData] = useState({ food_info: {}, notes: '' });
+    const [formData, setFormData] = useState({});
     const [newFoodName, setNewFoodName] = useState('');
     const [loading, setLoading] = useState(true);
-    const [foodService, setFoodService] = useState(null);
-
-    const saveTimeoutRef = useRef(null);
+    const [service, setService] = useState(null);
+    const notesRef = useRef('');
+    const serviceRef = useRef(null);
+    const formDataRef = useRef({});
+    const hasChanged = useRef(false);
 
     // Calculate total calories dynamically from the Object
     let totalFoodCal = 0;
-    if (formData.food_info) {
-        Object.values(formData.food_info).forEach((cals) => {
+    if (formData.food_list) {
+        Object.values(formData.food_list).forEach((cals) => {
             totalFoodCal += Number(cals) || 0;
         });
     }
@@ -34,27 +35,31 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
             try {
                 setLoading(true)
 
-                const service = await getFoodService();
+                const s = await getService();
                 if (!mounted) return;
 
-                setFoodService(service)
+                setService(s)
 
-                const record = await service.getFoodRecord(currentDate);
+                const record = await s.getRecord(currentDate, "food_records_v2");
                 if (!mounted) return;
 
                 if (record) {
                     setFormData({
-                        food_info: record.food_info || {},
+                        food_list: record.food_list || {},
                         notes: record.notes || ''
                     });
                 } else {
-                    setFormData(service.getDefaultFoodRecord());
+                    setFormData({
+                        food_list: {},
+                        notes: ""
+                    });
                 }
             } catch (error) {
                 console.error('Failed to load food record:', error);
-                if (foodService) {
-                    setFormData(foodService.getDefaultFoodRecord());
-                }
+                setFormData({
+                    food_list: {},
+                    notes: ""
+                });
             } finally {
                 if (mounted) {
                     setLoading(false);
@@ -62,7 +67,6 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
             }
 
         }
-
         initialize();
 
         return () => {
@@ -71,102 +75,126 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
     }, [currentDate]);
 
     useEffect(() => {
-        return () => {
-            if (saveTimeoutRef.current) {
-                clearTimeout(saveTimeoutRef.current);
-            }
-        };
-    }, []);
+        formDataRef.current = formData;
+        serviceRef.current = service;
+    }, [formData, service]);
 
-    // Core Saving Mechanism
-    const debouncedSave = (data, instant) => {
-        if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    useEffect(() => {
+        if (!serviceRef.current || loading) return;
 
-        setSaveStatus('saving');
-        const time = instant ? 500 : 3500;
-
-        saveTimeoutRef.current = setTimeout(async () => {
-            if (!foodService) return;
+        const interval = setInterval(async () => {
+            if (!hasChanged.current) return;
             try {
-                await foodService.saveFoodRecord(currentDate, data);
-                setSaveStatus('saved');
-                setTimeout(() => setSaveStatus('idle'), 1000);
+                const updatedData = {
+                    ...formDataRef.current, // safe snapshot for non-notes fields
+                    notes: notesRef.current
+                };
+
+                await serviceRef.current.saveRecord(currentDate, updatedData, "food_records_v2");
+                hasChanged.current = false;
             } catch (error) {
                 console.error('Failed to save food record:', error);
-                setSaveStatus('error');
-                setTimeout(() => setSaveStatus('idle'), 1000);
             }
-        }, time);
-    };
+        }, 3000);
 
-    const saveField = (field, instant = false, directValue = null) => {
-        const rawValue = directValue !== null ? directValue : formData[field];
+        return () => clearInterval(interval);
+    }, [currentDate, service, loading]);
 
-        const updatedData = {
+    const saveField = async (data) => {
+        try {
+            await service.saveRecord(currentDate, data, "food_records_v2");
+            console.log("information saved");
+        } catch (error) {
+            console.error('Failed to save food record:', error);
+        }
+    }
+
+    const handleAddFood = async (food_name, calories) => {
+        const name = food_name.trim();
+
+        if (!name || (formData.food_list && name in formData.food_list)) return;
+
+        const updatedFormData = {
             ...formData,
-            [field]: rawValue
+            food_list: {
+                ...formData.food_list,
+                [name]: calories
+            }
         };
 
-        setFormData(updatedData);
-        debouncedSave(updatedData, instant);
+        setFormData(updatedFormData);
+
+        if (service) {
+            await saveField(updatedFormData);
+        }
+        setNewFoodName('');
     };
 
-    const handleAddFood = () => {
-        const name = newFoodName.trim();
-        if (!name) return;
+    const handleUpdateCalories = async (food_name, newCalories) => {
+        const updatedFormData = {
+            ...formData,
+            food_list: {
+                ...formData.food_list,
+                [food_name]: newCalories
+            }
+        };
 
-        const updatedInfo = { ...formData.food_info };
-        if (!(name in updatedInfo)) {
-            updatedInfo[name] = 0;
+        setFormData(updatedFormData);
+
+        if (service) {
+            await saveField(updatedFormData);
+        }
+    };
+
+    const handleEditFoodName = async (oldName, newName) => {
+        const updatedFoodList = {
+            ...formData.food_list
+        };
+        const calories = updatedFoodList[oldName];
+        delete updatedFoodList[oldName];
+        updatedFoodList[newName] = calories;
+
+        const updatedFormData = {
+            ...formData,
+            food_list: updatedFoodList
         }
 
-        const updatedData = { ...formData, food_info: updatedInfo };
-        setFormData(updatedData);
-        setNewFoodName('');
-        debouncedSave(updatedData, true);
+        setFormData(updatedFormData)
+
+        if (service) {
+            await saveField(updatedFormData)
+        }
+    };
+
+    const handleDeleteFood = async (food_name) => {
+        const updatedFoodList = {
+            ...formData.food_list
+        };
+        const calories = updatedFoodList[food_name];
+        delete updatedFoodList[food_name];
+
+        const updatedFormData = {
+            ...formData,
+            food_list: updatedFoodList
+        }
+
+        setFormData(updatedFormData)
+
+        if (service) {
+            await saveField(updatedFormData)
+        }
     };
 
     const handleAddFoodKeyPress = (e) => {
         if (e.key === 'Enter') {
-            handleAddFood();
+            handleAddFood(newFoodName, 0);
         }
     };
 
-    const handleUpdateCalories = (foodName, newCalories) => {
-        const updatedInfo = { ...formData.food_info };
-        updatedInfo[foodName] = newCalories;
-
-        const updatedData = { ...formData, food_info: updatedInfo };
-        setFormData(updatedData);
-        debouncedSave(updatedData, true);
-    };
-
-    const handleEditFoodName = (oldName, newName) => {
-        const updatedInfo = { ...formData.food_info };
-
-        // Save the old calories, delete the old key, and assign it to the new key
-        const existingCalories = updatedInfo[oldName];
-        delete updatedInfo[oldName];
-        updatedInfo[newName] = existingCalories;
-
-        const updatedData = { ...formData, food_info: updatedInfo };
-        setFormData(updatedData);
-        debouncedSave(updatedData, true);
-    };
-
-    const handleDeleteFood = (foodName) => {
-        const updatedInfo = { ...formData.food_info };
-        delete updatedInfo[foodName];
-
-        const updatedData = { ...formData, food_info: updatedInfo };
-        setFormData(updatedData);
-        debouncedSave(updatedData, true);
-    };
-
     const handleNotesChange = (value) => {
-        const updatedData = { ...formData, notes: value };
-        setFormData(updatedData);
-        debouncedSave(updatedData, false);
+        notesRef.current = value;
+        hasChanged.current = true;
+        setFormData(prev => ({ ...prev, notes: value }));
     };
 
     return (
@@ -174,7 +202,7 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
             <PageHeader onBack={onBack} />
 
             <div style={styles.content}>
-                
+
                 <DateNavigator
                     currentDate={currentDate}
                     onPrevious={() =>
@@ -243,18 +271,18 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
                     <div style={styles.intakeCard}>
                         <div style={styles.intakeHeader}>
                             <h3 style={styles.cardHeader}>Daily Intake</h3>
-                            <span style={styles.itemCount}>{Object.keys(formData.food_info).length} Items Logged</span>
+                            <span style={styles.itemCount}>{Object.keys(formData.food_list || {}).length} Items Logged</span>
                         </div>
 
                         <div style={styles.foodList}>
-                            {Object.entries(formData.food_info).map(([foodName, calories]) => (
+                            {Object.entries(formData.food_list || {}).map(([food_name, calories]) => (
                                 <Template
-                                    key={foodName}
-                                    foodName={foodName}
+                                    key={food_name}
+                                    foodName={food_name}
                                     initialCalories={calories}
                                     onUpdateCalories={handleUpdateCalories}
                                     onEditName={handleEditFoodName}
-                                    onDelete={() => handleDeleteFood(foodName)}
+                                    onDelete={() => handleDeleteFood(food_name)}
                                 />
                             ))}
                         </div>
@@ -267,7 +295,7 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
                                 onChange={(e) => setNewFoodName(e.target.value)}
                                 onKeyDown={handleAddFoodKeyPress}
                             />
-                            <button style={styles.addBtn} onClick={handleAddFood}>Add</button>
+                            <button style={styles.addBtn} onClick={() => handleAddFood(newFoodName, 0)}>Add</button>
                         </div>
                     </div>
                 </div>
@@ -275,8 +303,6 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
                 <NotesSection
                     value={formData.notes}
                     onChange={handleNotesChange}
-                    saveStatus={saveStatus}
-                    saveField={saveField}
                 />
             </div>
         </div>
