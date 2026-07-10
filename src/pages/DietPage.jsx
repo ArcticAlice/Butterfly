@@ -48,8 +48,6 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
                         food_list: record.food_list || {},
                         notes: record.notes || ''
                     });
-                    console.log(formData);
-                    console.log(typeof(formData))
                 } else {
                     setFormData({
                         food_list: {},
