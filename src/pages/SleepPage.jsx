@@ -106,7 +106,7 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
                     notes: notesRef.current
                 };
 
-                await serviceRef.current.saveRecord(currentDate, updatedData, "_v2");
+                await serviceRef.current.saveRecord(currentDate, updatedData, "sleep_records_v2");
                 hasChanged.current = false;
             } catch (error) {
                 console.error('Failed to save sleep record:', error);
