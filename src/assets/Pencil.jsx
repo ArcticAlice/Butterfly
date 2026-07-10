@@ -1,6 +1,6 @@
 import { colors } from "../utils/theme";
 
-function Pencil( {width = "50px", height = "50px", color = colors.third, stroke = "white", strokeWidth = 1, ...props} ) {
+function Pencil( {size = "15px", color = colors.third, stroke = "white", strokeWidth = 1, ...props} ) {
 
     const style = {
         cursor: "pointer",
@@ -10,8 +10,8 @@ function Pencil( {width = "50px", height = "50px", color = colors.third, stroke 
         return (
         <svg style={style}
             xmlns="http://www.w3.org/2000/svg"
-            width={width}
-            height={height}
+            width={size}
+            height={size}
             viewBox="0 -960 960 960"
             fill={color}
             stroke={stroke}
