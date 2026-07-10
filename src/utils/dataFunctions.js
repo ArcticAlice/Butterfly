@@ -16,6 +16,10 @@ class Service {
     }
 
     // async databaseShift() {
+    //     const something = await this.db.select(
+    //         `SELECT * FROM sleep_records_v2`
+    //     );
+    //     if (something.length > 0) return;
     //     try {
     //         const result = await this.db.select(
     //             `SELECT * FROM sleep_records`
