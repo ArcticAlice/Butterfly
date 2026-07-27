@@ -19,7 +19,7 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
     const serviceRef = useRef(null);
     const formDataRef = useRef({});
     const inputRefs = useRef({}); // ADD: holds DOM nodes for each field's input
-        const hasChanged = useRef(false);
+    const hasChanged = useRef(false);
 
     // Safely compute totals with fallback values to prevent NaN render errors
     const totalSleepMins =
