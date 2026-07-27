@@ -8,9 +8,8 @@ import { colors, typography, spacing } from '../utils/theme';
 import { getService } from "../utils/dataFunctions";
 import { formatTime } from '../utils/helperFunctions';
 
-function SleepPage({ onBack, currentDate, setCurrentDate }) {
+function SleepPage({ onBack, currentDate, setCurrentDate, service }) {
     const [loading, setLoading] = useState(true);
-    const [service, setService] = useState(null);
     const [formData, setFormData] = useState({});
     const [editingFields, setEditingFields] = useState({});
     const [tempValues, setTempValues] = useState({});
@@ -33,13 +32,12 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
         let mounted = true;
 
         async function initialize() {
+            if (!service) return;
             try {
                 if (!mounted) return;
-
                 setLoading(true);
-                const s = await getService();
-                setService(s);
-                const record = await s.getRecord(currentDate, "sleep_records_v2");
+
+                const record = await service.getRecord(currentDate, "sleep_records_v2");
 
                 if (record) {
                     setFormData({
@@ -88,7 +86,7 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
         return () => {
             mounted = false;
         };
-    }, [currentDate]);
+    }, [currentDate, service]);
 
     useEffect(() => {
         formDataRef.current = formData;
