@@ -110,6 +110,7 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
     }
 
     const handleAddFood = async (food_name, calories) => {
+        hasChanged.current = true;
         const name = food_name.trim();
 
         if (!name || (formData.food_list && name in formData.food_list)) return;
@@ -131,6 +132,7 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
     };
 
     const handleUpdateCalories = async (food_name, newCalories) => {
+        hasChanged.current = true;
         const updatedFormData = {
             ...formData,
             food_list: {
@@ -147,6 +149,7 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
     };
 
     const handleEditFoodName = async (oldName, newName) => {
+        hasChanged.current = true;
         const updatedFoodList = {
             ...formData.food_list
         };
@@ -167,6 +170,7 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
     };
 
     const handleDeleteFood = async (food_name) => {
+        hasChanged.current = true;
         const updatedFoodList = {
             ...formData.food_list
         };
@@ -294,8 +298,15 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
                                 value={newFoodName}
                                 onChange={(e) => setNewFoodName(e.target.value)}
                                 onKeyDown={handleAddFoodKeyPress}
+                                disabled={loading}
                             />
-                            <button style={styles.addBtn} onClick={() => handleAddFood(newFoodName, 0)}>Add</button>
+                            <button 
+                                style={styles.addBtn} 
+                                onClick={() => handleAddFood(newFoodName, 0)}
+                                disabled={loading}
+                            >
+                                Add
+                            </button>
                         </div>
                     </div>
                 </div>
