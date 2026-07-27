@@ -19,7 +19,7 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
     const serviceRef = useRef(null);
     const formDataRef = useRef({});
     const inputRefs = useRef({}); // ADD: holds DOM nodes for each field's input
-        const hasChanged = useRef(false);
+    const hasChanged = useRef(false);
 
     // Safely compute totals with fallback values to prevent NaN render errors
     const totalSleepMins =
@@ -111,7 +111,7 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
             } catch (error) {
                 console.error('Failed to save sleep record:', error);
             }
-        }, 3000);
+        }, 2000);
 
         return () => clearInterval(interval);
     }, [currentDate, service, loading]);

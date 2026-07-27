@@ -131,7 +131,7 @@ function VitalsPage({ onBack, currentDate, setCurrentDate }) {
             } catch (error) {
                 console.error('Failed to save vitals record:', error);
             }
-        }, 3000);
+        }, 2000);
 
         return () => clearInterval(interval);
     }, [currentDate, service, loading]);

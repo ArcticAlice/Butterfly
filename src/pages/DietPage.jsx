@@ -95,7 +95,7 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
             } catch (error) {
                 console.error('Failed to save food record:', error);
             }
-        }, 3000);
+        }, 2000);
 
         return () => clearInterval(interval);
     }, [currentDate, service, loading]);
