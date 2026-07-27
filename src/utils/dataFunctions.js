@@ -55,7 +55,12 @@ let serviceInstance = null;
 
 export async function getService() {
     if (!serviceInstance) {
-        serviceInstance = await Service.create();
+        try {
+            serviceInstance = await Service.create();
+        } catch (error) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+            serviceInstance = await Service.create();
+        }
     }
     return serviceInstance;
 }
