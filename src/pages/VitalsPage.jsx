@@ -24,9 +24,8 @@ function MetricInput({ label, value, unit, field, changeFunction, saveField, key
     )
 };
 
-function VitalsPage({ onBack, currentDate, setCurrentDate }) {
+function VitalsPage({ onBack, currentDate, setCurrentDate, service }) {
     const [loading, setLoading] = useState(true);
-    const [service, setService] = useState(null);
     const [formData, setFormData] = useState({});
     const saveTimeoutRef = useRef(null);
     const notesRef = useRef('');
@@ -38,15 +37,11 @@ function VitalsPage({ onBack, currentDate, setCurrentDate }) {
         let mounted = true;
 
         async function initialize() {
+            if (!service) return;
             try {
                 setLoading(true);
 
-                const s = await getService();
-                if (!mounted) return;
-
-                setService(s);
-
-                const record = await s.getRecord(currentDate, "vitals_records_v2");
+                const record = await service.getRecord(currentDate, "vitals_records_v2");
                 if (!mounted) return;
 
                 if (record) {
@@ -108,7 +103,7 @@ function VitalsPage({ onBack, currentDate, setCurrentDate }) {
         return () => {
             mounted = false;
         };
-    }, [currentDate]);
+    }, [currentDate, service]);
 
     useEffect(() => {
         formDataRef.current = formData;

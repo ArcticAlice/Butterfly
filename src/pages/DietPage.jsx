@@ -7,11 +7,10 @@ import Template from '../components/Template';
 import { colors, typography, spacing } from '../utils/theme';
 import { getService } from "../utils/dataFunctions";
 
-function DietPage({ onBack, currentDate, setCurrentDate }) {
+function DietPage({ onBack, currentDate, setCurrentDate, service }) {
     const [formData, setFormData] = useState({});
     const [newFoodName, setNewFoodName] = useState('');
     const [loading, setLoading] = useState(true);
-    const [service, setService] = useState(null);
     const notesRef = useRef('');
     const serviceRef = useRef(null);
     const formDataRef = useRef({});
@@ -32,15 +31,11 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
     useEffect(() => {
         let mounted = true;
         async function initialize() {
+            if (!service) return;
             try {
                 setLoading(true)
 
-                const s = await getService();
-                if (!mounted) return;
-
-                setService(s)
-
-                const record = await s.getRecord(currentDate, "food_records_v2");
+                const record = await service.getRecord(currentDate, "food_records_v2");
                 if (!mounted) return;
 
                 if (record) {
@@ -72,7 +67,7 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
         return () => {
             mounted = false;
         };
-    }, [currentDate]);
+    }, [currentDate, service]);
 
     useEffect(() => {
         formDataRef.current = formData;
