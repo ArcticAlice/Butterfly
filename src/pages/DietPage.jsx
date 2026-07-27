@@ -95,7 +95,7 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
             } catch (error) {
                 console.error('Failed to save food record:', error);
             }
-        }, 3000);
+        }, 2000);
 
         return () => clearInterval(interval);
     }, [currentDate, service, loading]);
@@ -110,6 +110,7 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
     }
 
     const handleAddFood = async (food_name, calories) => {
+        if (loading) return;
         hasChanged.current = true;
         const name = food_name.trim();
 
@@ -132,6 +133,7 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
     };
 
     const handleUpdateCalories = async (food_name, newCalories) => {
+        if (loading) return;
         hasChanged.current = true;
         const updatedFormData = {
             ...formData,
@@ -149,6 +151,7 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
     };
 
     const handleEditFoodName = async (oldName, newName) => {
+        if (loading) return;
         hasChanged.current = true;
         const updatedFoodList = {
             ...formData.food_list
@@ -170,6 +173,7 @@ function DietPage({ onBack, currentDate, setCurrentDate }) {
     };
 
     const handleDeleteFood = async (food_name) => {
+        if (loading) return;
         hasChanged.current = true;
         const updatedFoodList = {
             ...formData.food_list

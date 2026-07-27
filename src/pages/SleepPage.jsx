@@ -111,7 +111,7 @@ function SleepPage({ onBack, currentDate, setCurrentDate }) {
             } catch (error) {
                 console.error('Failed to save sleep record:', error);
             }
-        }, 3000);
+        }, 2000);
 
         return () => clearInterval(interval);
     }, [currentDate, service, loading]);
