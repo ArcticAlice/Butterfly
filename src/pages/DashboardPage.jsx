@@ -83,13 +83,13 @@ const styles = {
     topGrid: { display: 'grid', gridTemplateColumns: '2fr 1fr', gap: spacing.lg, marginBottom: spacing.lg },
 
     card: {
-        backgroundColor: colors.card, borderRadius: '16px', padding: spacing.lg, cursor: 'pointer'
+        backgroundColor: colors.card, border: `1px solid ${colors.third}`, borderRadius: spacing.md, padding: spacing.lg, cursor: 'pointer', color: colors.textPrimary, ...typography.h2
     },
     cardHeader: { display: 'flex', justifyContent: 'space-between', marginBottom: spacing.lg },
     metricsColumn: { display: 'flex', flexDirection: 'column', gap: spacing.md },
-    smallCard: { backgroundColor: colors.card, borderRadius: '16px', padding: spacing.md, cursor: 'pointer', flex: '1' },
+    smallCard: { backgroundColor: colors.card, border: `1px solid ${colors.second}`, borderRadius: spacing.md, padding: spacing.md, cursor: 'pointer', flex: '1', color: colors.textPrimary, ...typography.h3 },
 
-    bloodWorkCard: { backgroundColor: colors.card, borderRadius: '16px', padding: spacing.lg, cursor: 'pointer' },
+    bloodWorkCard: { backgroundColor: colors.card, border: `1px solid ${colors.first}`, borderRadius: spacing.md, padding: spacing.lg, cursor: 'pointer', color: colors.textPrimary, ...typography.h2 },
 };
 
 export default DashboardPage;

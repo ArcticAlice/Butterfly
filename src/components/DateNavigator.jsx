@@ -8,7 +8,7 @@ function DateNavigator({ currentDate, onPrevious, onNext, format = 'long' }) {
     const weekday = currentDate.toLocaleDateString('en-US', {
         weekday: 'long'
     });
-    // ========== LOGIC SECTION ==========
+
     useEffect(() => {
         const handleKeyPress = (e) => {
 
@@ -46,16 +46,15 @@ function DateNavigator({ currentDate, onPrevious, onNext, format = 'long' }) {
         return dateObj.toLocaleDateString('en-US');
     };
 
-    // ========== RETURN STATEMENT ==========
     return (
         <div style={styles.container}>
-            <Left onClick={onPrevious}/>
+            <Left onClick={onPrevious} size="18px" color={colors.first} stroke="none" />
 
             <div style={styles.dateDisplay}>
                 {`${weekday}, ${formatDate(currentDate)}`}
             </div>
 
-            <Right onClick={onNext}/>
+            <Right onClick={onNext} size="18px" color={colors.first} stroke="none" />
         </div>
     );
 }
@@ -66,13 +65,17 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'center',
         gap: spacing.lg,
-        width: '100%'
+        width: '100%',
+        margin: `${spacing.md} 0`
     },
     dateDisplay: {
-        ...typography.h3,
+        fontFamily: typography.fontFamily,
+        fontSize: '22px',
+        fontWeight: '600',
         color: colors.first,
-        minWidth: '200px',
+        minWidth: '240px',
         textAlign: 'center',
+        letterSpacing: '-0.01em',
     },
 };
 

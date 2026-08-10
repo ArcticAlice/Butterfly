@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import Vert from "../assets/Vert";
-import Pencil from "../assets/Pencil";
-import {colors} from "../utils/theme"
+import { colors, typography, spacing } from "../utils/theme";
 
 function Template({ foodName, initialCalories, onUpdateCalories, onDelete, onEditName }) {
     const [calories, setCalories] = useState(initialCalories || '');
@@ -38,9 +37,9 @@ function Template({ foodName, initialCalories, onUpdateCalories, onDelete, onEdi
 
     return (
         <div style={style.box}>
-            <Vert width="75%" height="75%" onClick={() => setIsEditingName(true)} />
+            <Vert width="20px" height="20px" onClick={() => setIsEditingName(true)} style={{ cursor: 'pointer' }} />
 
-            <div style={{display: "flex", flexDirection: "column", justifyContent: "center"}}>
+            <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", cursor: "pointer" }} onClick={() => setIsEditingName(true)}>
                 {isEditingName ? (
                     <input
                         ref={nameInputRef}
@@ -65,7 +64,15 @@ function Template({ foodName, initialCalories, onUpdateCalories, onDelete, onEdi
                 style={style.durationInput}
                 placeholder="0"
             />
-            <Pencil width="75%" height="75%" onClick={() => onDelete(foodName)} />
+            {onDelete && (
+                <button
+                    onClick={() => onDelete(foodName)}
+                    style={style.deleteBtn}
+                    title="Remove"
+                >
+                    &times;
+                </button>
+            )}
         </div>
     );
 }
@@ -74,39 +81,64 @@ export default Template;
 
 const style = {
     box: {
-        width: "90%",
-        height: "40px",
-        border: `1px solid ${colors.second}`,
-        borderRadius: "8px",
+        width: "100%",
+        height: "44px",
+        backgroundColor: colors.card,
+        border: `1px solid ${colors.border}`,
+        borderRadius: '4px',
         display: "grid",
-        gridTemplateColumns: "10% 70% 13% 7%",
+        gridTemplateColumns: "36px 1fr 64px 32px",
         boxSizing: "border-box",
         alignItems: "center",
+        padding: `0 ${spacing.sm}`,
+        gap: spacing.xs,
     },
     text: {
         whiteSpace: "nowrap",
         overflow: "hidden",
         textOverflow: "ellipsis",
         display: "inline-block",
-        height: "100%",
         color: colors.first,
+        fontFamily: typography.fontFamily,
+        fontSize: '14px',
+        fontWeight: '500',
     },
     nameInput: {
-        border: `none`,
-        fontSize: "14px",
+        border: `1px solid ${colors.border}`,
+        borderRadius: '2px',
+        fontSize: '14px',
         display: "inline-block",
         outline: "none",
-        height: "100%",
+        backgroundColor: colors.card,
         color: colors.first,
+        padding: '2px 4px',
+        fontFamily: typography.fontFamily,
     },
     durationInput: {
-        borderRadius: "5px",
+        borderRadius: '2px',
         display: "inline-block",
-        textAlign: "center",
-        fontSize: "14px",
-        height: "80%",
-        border: "none",
+        textAlign: "right",
+        fontSize: '14px',
+        fontWeight: '600',
+        height: "28px",
+        border: `1px solid ${colors.border}`,
         outline: "none",
-        color: colors.first
+        backgroundColor: colors.card,
+        color: colors.first,
+        padding: '0 6px',
+        fontFamily: typography.monoFontFamily || 'monospace',
+    },
+    deleteBtn: {
+        background: 'transparent',
+        border: 'none',
+        color: colors.second,
+        fontSize: '18px',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 0,
+        width: '24px',
+        height: '24px',
     }
 };

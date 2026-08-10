@@ -1,6 +1,6 @@
 import {colors} from "../utils/theme"
 
-function Right( {width = "25px", height = "25px", color = colors.second, stroke = "white", strokeWidth = 1, ...props} ) {
+function Right( {size = "25px", color = colors.second, stroke = colors.textPrimary, strokeWidth = 1, ...props} ) {
 
     const style = {
         cursor: "pointer"
@@ -9,8 +9,8 @@ function Right( {width = "25px", height = "25px", color = colors.second, stroke 
         return (
         <svg style={style}
             xmlns="http://www.w3.org/2000/svg"
-            width={width}
-            height={height}
+            width={size}
+            height={size}
             viewBox="0 -960 960 960"
             fill={color}
             stroke={stroke}

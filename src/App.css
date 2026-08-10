@@ -1,11 +1,11 @@
 body {
-  /* background-color: #d7e9ff88; */
-  background-color: #c0d0e588;
+  background-color: black;
+  color: white;
 }
 
 * {
-  font-family: Copperplate, Papyrus, fantasy;
-  letter-spacing: -.3px;
+  font-family: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  box-sizing: border-box;
   padding: 0;
   margin: 0;
 }

@@ -336,13 +336,14 @@ const styles = {
     },
     summaryCard: {
         backgroundColor: colors.card,
-        borderRadius: '24px',
+        border: `1px solid ${colors.border}`,
+        borderRadius: spacing.lg,
         padding: spacing.xl,
         display: 'grid',
         gridTemplateColumns: 'repeat(2, auto)',
         gridTemplateRows: 'repeat(3, auto)',
         boxSizing: 'border-box',
-        columnGap: '20px'
+        columnGap: spacing.md
     },
     metricContainer: {
         display: 'flex',
@@ -350,30 +351,31 @@ const styles = {
         justifyContent: 'center'
     },
     metricLabel: {
-        fontSize: '14px',
-        color: colors.first,
-        marginBottom: '5px',
-        marginLeft: '5px'
+        ...typography.caption,
+        color: colors.second,
+        marginBottom: spacing.xs,
+        marginLeft: spacing.xs
     },
     inputWrapper: {
         display: 'flex',
         alignItems: 'center',
-        border: `1px solid ${colors.second}`,
-        borderRadius: '12px',
-        padding: '0 12px',
-        height: '48px'
+        border: `1px solid ${colors.first}`,
+        borderRadius: spacing.sm,
+        padding: `0 ${spacing.sm}`,
+        height: '48px',
+        backgroundColor: colors.card,
     },
     customInput: {
         flex: 1,
         background: 'transparent',
         border: 'none', outline: 'none',
-        fontSize: '16px',
+        ...typography.body,
         color: colors.first,
         fontWeight: '500',
         width: '100%'
     },
     unitText: {
-        fontSize: '10px', fontWeight: 'bold', color: colors.first
+        ...typography.caption, fontWeight: 'bold', color: colors.second
     },
 };
 

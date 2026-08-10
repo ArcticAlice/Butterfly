@@ -1,6 +1,6 @@
 import { colors } from "../utils/theme";
 
-function Pencil( {size = "15px", color = colors.third, stroke = "white", strokeWidth = 1, ...props} ) {
+function Pencil( {size = "15px", color = colors.third, stroke = colors.textPrimary, strokeWidth = 1, ...props} ) {
 
     const style = {
         cursor: "pointer",

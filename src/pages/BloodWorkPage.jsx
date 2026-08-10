@@ -140,34 +140,34 @@ const styles = {
     },
 
     // Navigator Styles
-    navigator: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '40px', marginBottom: '40px' },
-    navArrow: { background: 'none', border: 'none', fontSize: '32px', color: '#1E293B', cursor: 'pointer', paddingBottom: '4px' },
+    navigator: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: spacing.xl, marginBottom: spacing.xl },
+    navArrow: { background: 'none', border: 'none', fontSize: typography.h1.fontSize, color: colors.first, cursor: 'pointer', paddingBottom: spacing.xs },
     navCenter: { textAlign: 'center' },
-    navTitle: { fontSize: '20px', fontWeight: 'bold', color: '#1E293B' },
-    navDate: { fontSize: '11px', color: '#94A3B8', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' },
+    navTitle: { ...typography.h2, color: colors.first },
+    navDate: { ...typography.caption, color: colors.fifth, marginTop: spacing.xs, textTransform: 'uppercase', letterSpacing: '0.5px' },
 
     // Card Styles
     reportCard: {
-        backgroundColor: colors.card, borderRadius: '24px', padding: '48px', position: 'relative'
+        backgroundColor: colors.card, border: `1px solid ${colors.border}`, borderRadius: spacing.lg, padding: spacing.xxl, position: 'relative'
     },
-    cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '48px' },
-    cardTitle: { fontSize: '28px', fontWeight: 'bold', color: '#1E293B', margin: 0 },
+    cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: spacing.xxl },
+    cardTitle: { ...typography.h1, color: colors.first, margin: 0 },
     statusPill: {
-        backgroundColor: '#ECFDF5', color: colors.secondary, fontSize: '10px',
-        fontWeight: 'bold', padding: '6px 12px', borderRadius: '12px', letterSpacing: '0.5px'
+        backgroundColor: colors.card, color: colors.second, border: `1px solid ${colors.fifth}`, ...typography.caption,
+        fontWeight: 'bold', padding: `${spacing.xs} ${spacing.sm}`, borderRadius: spacing.sm, letterSpacing: '0.5px'
     },
 
-    panelsGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '60px' },
-    sectionHeader: { fontSize: '10px', fontWeight: 'bold', color: colors.secondary, marginBottom: '24px', letterSpacing: '1px' },
+    panelsGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: spacing.xxl },
+    sectionHeader: { ...typography.caption, fontWeight: 'bold', color: colors.second, marginBottom: spacing.lg, letterSpacing: '1px' },
 
-    inputContainer: { marginBottom: '20px' },
-    inputLabel: { display: 'block', fontSize: '12px', fontWeight: '600', color: '#1E293B', marginBottom: '8px' },
+    inputContainer: { marginBottom: spacing.md },
+    inputLabel: { display: 'block', ...typography.caption, fontWeight: '600', color: colors.first, marginBottom: spacing.xs },
     customInput: {
-        width: '100%', backgroundColor: '#F1F5F9', border: 'none', borderRadius: '12px',
-        padding: '14px 16px', fontSize: '14px', color: '#94A3B8', outline: 'none'
+        width: '100%', backgroundColor: colors.card, border: `1px solid ${colors.border}`, borderRadius: spacing.sm,
+        padding: `${spacing.sm} ${spacing.md}`, ...typography.caption, color: colors.second, outline: 'none'
     },
 
-    notesWrapper: { borderTop: '1px solid #F1F5F9', marginTop: '40px', paddingTop: '10px' }
+    notesWrapper: { borderTop: `1px solid ${colors.border}`, marginTop: spacing.xl, paddingTop: spacing.sm }
 };
 
 export default BloodWorkPage;
