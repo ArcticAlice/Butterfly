@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 
 // Import pages
-import AuthPage from './pages/AuthPage';
+// import AuthPage from './pages/AuthPage';
 import DashboardPage from './pages/DashboardPage';
 import SleepPage from './pages/SleepPage';
 import DietPage from './pages/DietPage';

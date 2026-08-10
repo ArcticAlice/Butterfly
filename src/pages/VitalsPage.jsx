@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import PageHeader from '../components/PageHeader';
+import PageLayout from '../components/PageLayout';
 import DateNavigator from '../components/DateNavigator';
 import NotesSection from '../components/NotesSection';
-import { colors, typography, spacing } from '../utils/theme';
-import { getService } from '../utils/dataFunctions';
+import { colors, typography, spacing, borderRadius } from '../utils/theme';
 
 function MetricInput({ label, value, unit, field, changeFunction, saveField, keydown }) {
     return (
@@ -21,13 +20,12 @@ function MetricInput({ label, value, unit, field, changeFunction, saveField, key
                 <span style={styles.unitText}>{unit}</span>
             </div>
         </div>
-    )
-};
+    );
+}
 
 function VitalsPage({ onBack, currentDate, setCurrentDate, service }) {
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({});
-    const saveTimeoutRef = useRef(null);
     const notesRef = useRef('');
     const serviceRef = useRef(null);
     const formDataRef = useRef({});
@@ -145,11 +143,10 @@ function VitalsPage({ onBack, currentDate, setCurrentDate, service }) {
 
         try {
             await service.saveRecord(currentDate, updatedData, "vitals_records_v2");
-            console.log("information saved");
         } catch (error) {
             console.error('Failed to save vitals record:', error);
         }
-    }
+    };
 
     const handleKeyPress = (e, field) => {
         if (e.key === 'Enter') {
@@ -168,33 +165,31 @@ function VitalsPage({ onBack, currentDate, setCurrentDate, service }) {
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    // ========== RETURN STATEMENT ==========
     return (
-        <div style={styles.container}>
-            <PageHeader onBack={onBack} />
+        <PageLayout onBack={onBack}>
+            <DateNavigator
+                currentDate={currentDate}
+                onPrevious={() =>
+                    setCurrentDate(prev => {
+                        const newDate = new Date(prev);
+                        newDate.setDate(newDate.getDate() - 1);
+                        return newDate;
+                    })
+                }
+                onNext={() =>
+                    setCurrentDate(prev => {
+                        const newDate = new Date(prev);
+                        newDate.setDate(newDate.getDate() + 1);
+                        return newDate;
+                    })
+                }
+            />
 
-            <div style={styles.content}>
-
-                <DateNavigator
-                    currentDate={currentDate}
-                    onPrevious={() =>
-                        setCurrentDate(prev => {
-                            const newDate = new Date(prev);
-                            newDate.setDate(newDate.getDate() - 1);
-                            return newDate;
-                        })
-                    }
-                    onNext={() =>
-                        setCurrentDate(prev => {
-                            const newDate = new Date(prev);
-                            newDate.setDate(newDate.getDate() + 1);
-                            return newDate;
-                        })
-                    }
-                />
-
-                <div style={styles.mainGrid}>
-                    <div style={styles.summaryCard}>
+            <div style={styles.mainGrid}>
+                {/* Column 1: Cardiac & Respiration */}
+                <div style={styles.summaryCard}>
+                    <h3 style={styles.cardHeader}>CARDIAC & RESPIRATORY</h3>
+                    <div style={styles.metricsGroup}>
                         <MetricInput
                             label="Heart Rate Low"
                             field="heart_rate_low"
@@ -249,9 +244,13 @@ function VitalsPage({ onBack, currentDate, setCurrentDate, service }) {
                             keydown={handleKeyPress}
                             saveField={saveField}
                         />
-
                     </div>
-                    <div style={styles.summaryCard}>
+                </div>
+
+                {/* Column 2: Body Composition & Circulation */}
+                <div style={styles.summaryCard}>
+                    <h3 style={styles.cardHeader}>BODY & CIRCULATION</h3>
+                    <div style={styles.metricsGroup}>
                         <MetricInput
                             label="Skin Temp Var"
                             field="skin_temperature_variation"
@@ -283,7 +282,7 @@ function VitalsPage({ onBack, currentDate, setCurrentDate, service }) {
                             label="Body Fat Percentage"
                             field="body_fat_percentage"
                             value={formData.body_fat_percentage ?? ''}
-                            unit="MS"
+                            unit="%"
                             changeFunction={handleTempChange}
                             keydown={handleKeyPress}
                             saveField={saveField}
@@ -299,83 +298,87 @@ function VitalsPage({ onBack, currentDate, setCurrentDate, service }) {
                         />
                     </div>
                 </div>
-                <NotesSection
-                    value={formData.notes}
-                    onChange={handleNotesChange}
-                />
             </div>
-        </div>
+
+            <NotesSection
+                value={formData.notes}
+                onChange={handleNotesChange}
+            />
+        </PageLayout>
     );
 }
 
 const styles = {
-    container: {
-        height: '100vh',
-        width: '100vw',
-        boxSizing: 'border-box',
-        overflow: 'hidden',
-    },
-    content: {
-        width: '60%',
-        height: '93%',
-        position: 'absolute',
-        bottom: '0',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        display: 'grid',
-        gridTemplateRows: '5% 58% 28%',
-        gap: '2%',
-        boxSizing: 'border-box',
-        paddingTop: '2%',
-    },
     mainGrid: {
         display: 'grid',
-        gridTemplateColumns: 'auto auto',
-        gap: spacing.xl,
+        gridTemplateColumns: '1fr 1fr',
+        gap: spacing.lg,
         width: '100%',
+        height: "95%"
     },
     summaryCard: {
         backgroundColor: colors.card,
         border: `1px solid ${colors.border}`,
-        borderRadius: spacing.lg,
-        padding: spacing.xl,
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, auto)',
-        gridTemplateRows: 'repeat(3, auto)',
+        borderRadius: borderRadius.md,
+        padding: '36px 28px',
+        display: 'flex',
+        flexDirection: 'column',
         boxSizing: 'border-box',
-        columnGap: spacing.md
+        minHeight: '480px',
+        justifyContent: 'space-between',
+    },
+    cardHeader: {
+        ...typography.labelCaps,
+        color: colors.second,
+        margin: `0 0 24px 0`,
+    },
+    metricsGroup: {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        columnGap: '20px',
+        rowGap: '38px',
+        flex: 1,
     },
     metricContainer: {
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'center'
+        justifyContent: 'center',
     },
     metricLabel: {
         ...typography.caption,
+        fontSize: '12px',
         color: colors.second,
-        marginBottom: spacing.xs,
-        marginLeft: spacing.xs
+        marginBottom: '6px',
     },
     inputWrapper: {
         display: 'flex',
         alignItems: 'center',
-        border: `1px solid ${colors.first}`,
-        borderRadius: spacing.sm,
+        border: `1px solid ${colors.border}`,
+        borderRadius: borderRadius.sm,
         padding: `0 ${spacing.sm}`,
-        height: '48px',
-        backgroundColor: colors.card,
+        height: '42px',
+        backgroundColor: colors.background,
     },
+
+
+
+
     customInput: {
         flex: 1,
         background: 'transparent',
-        border: 'none', outline: 'none',
-        ...typography.body,
-        color: colors.first,
+        border: 'none',
+        outline: 'none',
+        fontFamily: typography.fontFamily,
+        fontSize: '14px',
         fontWeight: '500',
+        color: colors.first,
         width: '100%'
     },
     unitText: {
-        ...typography.caption, fontWeight: 'bold', color: colors.second
+        fontFamily: typography.monoFontFamily || 'monospace',
+        fontSize: '11px',
+        fontWeight: 'bold',
+        color: colors.second
     },
 };
 

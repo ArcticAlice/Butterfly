@@ -1,11 +1,11 @@
 export const colors = {
   first: '#EDCB96',        // Apricot Cream (Primary gold accent)
-  second: 'gray',       // Peach Fuzz (Secondary text: card section headers, labels)
+  second: '#A0A0A0',       // Subtle Gray / Secondary text: card section headers, labels
   third: '#9E7682',        // Dusty Mauve
   fourth: '#605770',       // Vintage Grape
   fifth: '#4D4861',        // Dark Vintage Grape
 
-  background: 'black',     // Canvas background (Pure black #000000)
+  background: '#000000',   // Canvas background (Pure black #000000)
   card: '#141414',         // Card background (Elevated surface slightly lighter than black)
 
   textPrimary: '#EDCB96',  // Primary text color alias
@@ -47,10 +47,18 @@ export const spacing = {
 
 export const borderRadius = {
   none: '0px',
-  sm: '0.125rem',     // 2px
-  DEFAULT: '0.25rem', // 4px
-  md: '0.375rem',     // 6px
-  lg: '0.5rem',       // 8px
-  xl: '0.75rem',      // 12px
+  sm: '4px',
+  DEFAULT: '6px',
+  md: '8px',
+  lg: '12px',
+  xl: '16px',
   full: '9999px',
+};
+
+export const cardStyle = {
+  backgroundColor: colors.card,
+  border: `1px solid ${colors.border}`,
+  borderRadius: borderRadius.md,
+  padding: spacing.lg,
+  boxSizing: 'border-box',
 };

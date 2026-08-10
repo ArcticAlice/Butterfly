@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import PageHeader from '../components/PageHeader';
+import React, { useState, useRef } from 'react';
+import PageLayout from '../components/PageLayout';
 import NotesSection from '../components/NotesSection';
-import DateNavigator from '../components/DateNavigator';
-import { colors, typography, spacing } from '../utils/theme';
+import { colors, typography, spacing, borderRadius } from '../utils/theme';
 
 function BloodWorkPage({ onBack }) {
     // ========== LOGIC SECTION ==========
@@ -10,7 +9,7 @@ function BloodWorkPage({ onBack }) {
     const [saveStatus, setSaveStatus] = useState('idle');
     const saveTimeoutRef = useRef(null);
 
-    // Initial data using the ranges from the picture as default values
+    // Initial data using standard reference ranges
     const [formData, setFormData] = useState({
         hemoglobin: '13.5 - 17.5',
         white_blood_cells: '4.5 - 11.0',
@@ -31,7 +30,7 @@ function BloodWorkPage({ onBack }) {
         setSaveStatus('saving');
         saveTimeoutRef.current = setTimeout(() => {
             setSaveStatus('idle');
-        }, 2000);
+        }, 1500);
     };
 
     // Helper for the lab input fields
@@ -48,126 +47,186 @@ function BloodWorkPage({ onBack }) {
     );
 
     return (
-        <div style={styles.container}>
-            <PageHeader onBack={onBack} />
+        <PageLayout onBack={onBack}>
+            {/* Lab Report Navigator */}
+            <div style={styles.navigator}>
+                <button
+                    onClick={() => setReportIndex(Math.max(1, reportIndex - 1))}
+                    style={styles.navArrow}
+                    title="Previous Report"
+                >
+                    ‹
+                </button>
+                <div style={styles.navCenter}>
+                    <div style={styles.navTitle}>Lab Report #{reportIndex}</div>
+                    <div style={styles.navDate}>October 24, 2023</div>
+                </div>
+                <button
+                    onClick={() => setReportIndex(reportIndex + 1)}
+                    style={styles.navArrow}
+                    title="Next Report"
+                >
+                    ›
+                </button>
+            </div>
 
-            <div style={styles.content}>
-                {/* Unique Lab Report Navigator */}
-                <div style={styles.navigator}>
-                    <button
-                        onClick={() => setReportIndex(Math.max(1, reportIndex - 1))}
-                        style={styles.navArrow}
-                    >
-                        ‹
-                    </button>
-                    <div style={styles.navCenter}>
-                        <div style={styles.navTitle}>Lab Report {reportIndex}</div>
-                        <div style={styles.navDate}>October 24, 2023</div>
+            <div style={styles.reportCard}>
+                {/* Card Header with Status Label */}
+                <div style={styles.cardHeader}>
+                    <div>
+                        <h2 style={styles.cardTitle}>Biometric Analysis</h2>
+                        <span style={styles.cardSubtext}>Standard Blood Panel & Biomarkers</span>
                     </div>
-                    <button
-                        onClick={() => setReportIndex(reportIndex + 1)}
-                        style={styles.navArrow}
-                    >
-                        ›
-                    </button>
+                    <div style={styles.statusPill}>STATUS: DRAFT</div>
                 </div>
 
-                <div style={styles.reportCard}>
-                    {/* Card Header with Status Label */}
-                    <div style={styles.cardHeader}>
-                        <h2 style={styles.cardTitle}>Biometric Analysis</h2>
-                        <div style={styles.statusPill}>STATUS: DRAFT</div>
+                <div style={styles.panelsGrid}>
+                    {/* Hematology Section */}
+                    <div style={styles.panelSection}>
+                        <h3 style={styles.sectionHeader}>HEMATOLOGY & GLUCOSE</h3>
+                        <LabInput label="Hemoglobin (g/dL)" value={formData.hemoglobin} field="hemoglobin" />
+                        <LabInput label="White Blood Cells (x10³/µL)" value={formData.white_blood_cells} field="white_blood_cells" />
+                        <LabInput label="Platelets (x10³/µL)" value={formData.platelets} field="platelets" />
+                        <LabInput label="Glucose, Fasting (mg/dL)" value={formData.glucose_fasting} field="glucose_fasting" />
                     </div>
 
-                    <div style={styles.panelsGrid}>
-                        {/* Hematology Section */}
-                        <div style={styles.panelSection}>
-                            <h3 style={styles.sectionHeader}>HEMATOLOGY & GLUCOSE</h3>
-                            <LabInput label="Hemoglobin (g/dL)" value={formData.hemoglobin} field="hemoglobin" />
-                            <LabInput label="White Blood Cells (x10³/µL)" value={formData.white_blood_cells} field="white_blood_cells" />
-                            <LabInput label="Platelets (x10³/µL)" value={formData.platelets} field="platelets" />
-                            <LabInput label="Glucose, Fasting (mg/dL)" value={formData.glucose_fasting} field="glucose_fasting" />
-                        </div>
-
-                        {/* Lipid Panel Section */}
-                        <div style={styles.panelSection}>
-                            <h3 style={styles.sectionHeader}>LIPID PANEL</h3>
-                            <LabInput label="Total Cholesterol (mg/dL)" value={formData.total_cholesterol} field="total_cholesterol" />
-                            <LabInput label="LDL Cholesterol (mg/dL)" value={formData.ldl_cholesterol} field="ldl_cholesterol" />
-                            <LabInput label="HDL Cholesterol (mg/dL)" value={formData.hdl_cholesterol} field="hdl_cholesterol" />
-                            <LabInput label="Triglycerides (mg/dL)" value={formData.triglycerides} field="triglycerides" />
-                        </div>
-                    </div>
-
-                    <div style={styles.notesWrapper}>
-                        <NotesSection
-                            value={formData.notes}
-                            onChange={(val) => handleFieldChange('notes', val)}
-                            saveStatus={saveStatus}
-                        />
+                    {/* Lipid Panel Section */}
+                    <div style={styles.panelSection}>
+                        <h3 style={styles.sectionHeader}>LIPID PANEL</h3>
+                        <LabInput label="Total Cholesterol (mg/dL)" value={formData.total_cholesterol} field="total_cholesterol" />
+                        <LabInput label="LDL Cholesterol (mg/dL)" value={formData.ldl_cholesterol} field="ldl_cholesterol" />
+                        <LabInput label="HDL Cholesterol (mg/dL)" value={formData.hdl_cholesterol} field="hdl_cholesterol" />
+                        <LabInput label="Triglycerides (mg/dL)" value={formData.triglycerides} field="triglycerides" />
                     </div>
                 </div>
             </div>
-        </div>
+
+            <NotesSection
+                value={formData.notes}
+                onChange={(val) => handleFieldChange('notes', val)}
+                saveStatus={saveStatus}
+            />
+        </PageLayout>
     );
 }
 
 const styles = {
-    container: {
-        height: '100vh',
-        width: '100vw',
-        boxSizing: 'border-box',
-        overflow: 'hidden',
-    },
-    content: {
-        width: '60%',
-        height: '93%',
-        position: 'absolute',
-        bottom: '0',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        display: 'grid',
-        gridTemplateRows: '.1fr 1fr .8fr',
-        gap: '2%',
-        boxSizing: 'border-box',
-        paddingTop: '2%',
-    },
-    mainGrid: {
-        display: 'grid',
-        gridTemplateColumns: '1fr 1.5fr',
-        gap: spacing.xl,
-        width: '100%',
-    },
-
     // Navigator Styles
-    navigator: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: spacing.xl, marginBottom: spacing.xl },
-    navArrow: { background: 'none', border: 'none', fontSize: typography.h1.fontSize, color: colors.first, cursor: 'pointer', paddingBottom: spacing.xs },
-    navCenter: { textAlign: 'center' },
-    navTitle: { ...typography.h2, color: colors.first },
-    navDate: { ...typography.caption, color: colors.fifth, marginTop: spacing.xs, textTransform: 'uppercase', letterSpacing: '0.5px' },
+    navigator: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: spacing.lg,
+        margin: `0 0 ${spacing.sm} 0`,
+        userSelect: 'none',
+    },
+    navArrow: {
+        background: 'none',
+        border: 'none',
+        fontSize: '28px',
+        color: colors.first,
+        cursor: 'pointer',
+        padding: '0 8px',
+        lineHeight: 1,
+        borderRadius: '4px',
+        transition: 'opacity 0.15s ease',
+    },
+    navCenter: {
+        textAlign: 'center',
+        minWidth: '220px',
+    },
+    navTitle: {
+        fontFamily: typography.fontFamily,
+        fontSize: '20px',
+        fontWeight: '600',
+        color: colors.first,
+    },
+    navDate: {
+        ...typography.labelCaps,
+        fontSize: '11px',
+        color: colors.second,
+        marginTop: spacing.xs,
+    },
 
     // Card Styles
     reportCard: {
-        backgroundColor: colors.card, border: `1px solid ${colors.border}`, borderRadius: spacing.lg, padding: spacing.xxl, position: 'relative'
+        backgroundColor: colors.card,
+        border: `1px solid ${colors.border}`,
+        borderRadius: borderRadius.md,
+        padding: spacing.xl,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: spacing.xl,
     },
-    cardHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: spacing.xxl },
-    cardTitle: { ...typography.h1, color: colors.first, margin: 0 },
+    cardHeader: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        borderBottom: `1px solid ${colors.border}`,
+        paddingBottom: spacing.md,
+    },
+    cardTitle: {
+        ...typography.h1,
+        color: colors.first,
+        margin: 0,
+    },
+    cardSubtext: {
+        ...typography.body,
+        fontSize: '13px',
+        color: colors.second,
+    },
     statusPill: {
-        backgroundColor: colors.card, color: colors.second, border: `1px solid ${colors.fifth}`, ...typography.caption,
-        fontWeight: 'bold', padding: `${spacing.xs} ${spacing.sm}`, borderRadius: spacing.sm, letterSpacing: '0.5px'
+        backgroundColor: colors.background,
+        color: colors.second,
+        border: `1px solid ${colors.border}`,
+        ...typography.labelCaps,
+        fontSize: '11px',
+        fontWeight: 'bold',
+        padding: `${spacing.xs} ${spacing.sm}`,
+        borderRadius: borderRadius.sm,
     },
 
-    panelsGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: spacing.xxl },
-    sectionHeader: { ...typography.caption, fontWeight: 'bold', color: colors.second, marginBottom: spacing.lg, letterSpacing: '1px' },
+    panelsGrid: {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: spacing.xl,
+    },
+    panelSection: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: spacing.md,
+    },
+    sectionHeader: {
+        ...typography.labelCaps,
+        color: colors.second,
+        marginBottom: spacing.xs,
+    },
 
-    inputContainer: { marginBottom: spacing.md },
-    inputLabel: { display: 'block', ...typography.caption, fontWeight: '600', color: colors.first, marginBottom: spacing.xs },
+    inputContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '6px',
+    },
+    inputLabel: {
+        fontFamily: typography.fontFamily,
+        fontSize: '13px',
+        fontWeight: '500',
+        color: colors.first,
+    },
     customInput: {
-        width: '100%', backgroundColor: colors.card, border: `1px solid ${colors.border}`, borderRadius: spacing.sm,
-        padding: `${spacing.sm} ${spacing.md}`, ...typography.caption, color: colors.second, outline: 'none'
+        width: '100%',
+        backgroundColor: colors.background,
+        border: `1px solid ${colors.border}`,
+        borderRadius: borderRadius.sm,
+        padding: '9px 12px',
+        fontFamily: typography.fontFamily,
+        fontSize: '14px',
+        color: colors.first,
+        outline: 'none',
+        boxSizing: 'border-box',
     },
 
-    notesWrapper: { borderTop: `1px solid ${colors.border}`, marginTop: spacing.xl, paddingTop: spacing.sm }
+
 };
 
 export default BloodWorkPage;

@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import PageHeader from '../components/PageHeader';
+import PageLayout from '../components/PageLayout';
 import DateNavigator from '../components/DateNavigator';
 import NotesSection from '../components/NotesSection';
 import Gauge from '../assets/Guage';
 import Template from '../components/Template';
-import { colors, typography, spacing } from '../utils/theme';
+import { colors, typography, spacing, borderRadius } from '../utils/theme';
 
 function DietPage({ onBack, currentDate, setCurrentDate, service }) {
     const [formData, setFormData] = useState({});
@@ -193,145 +193,116 @@ function DietPage({ onBack, currentDate, setCurrentDate, service }) {
     };
 
     return (
-        <div style={styles.container}>
-            <PageHeader onBack={onBack} />
-            <div style={styles.contentWrapper}>
-                <DateNavigator
-                    currentDate={currentDate}
-                    onPrevious={() =>
-                        setCurrentDate(prev => {
-                            const newDate = new Date(prev);
-                            newDate.setDate(newDate.getDate() - 1);
-                            return newDate;
-                        })
-                    }
-                    onNext={() =>
-                        setCurrentDate(prev => {
-                            const newDate = new Date(prev);
-                            newDate.setDate(newDate.getDate() + 1);
-                            return newDate;
-                        })
-                    }
-                />
+        <PageLayout onBack={onBack}>
+            <DateNavigator
+                currentDate={currentDate}
+                onPrevious={() =>
+                    setCurrentDate(prev => {
+                        const newDate = new Date(prev);
+                        newDate.setDate(newDate.getDate() - 1);
+                        return newDate;
+                    })
+                }
+                onNext={() =>
+                    setCurrentDate(prev => {
+                        const newDate = new Date(prev);
+                        newDate.setDate(newDate.getDate() + 1);
+                        return newDate;
+                    })
+                }
+            />
 
-                <div style={styles.mainGrid}>
-                    {/* Left Column: CALORIE GOAL */}
-                    <div style={styles.card}>
-                        <h3 style={styles.cardHeader}>CALORIE GOAL</h3>
-                        <div style={styles.gaugeContainer}>
-                            <div style={styles.gaugeWrapper}>
-                                <Gauge
-                                    percentage={percentage}
-                                    totalValue={totalFoodCal}
-                                    primaryColor={colors.first}
-                                    size={276}
-                                />
-                                <div style={styles.gaugeText}>
-                                    <span style={styles.totalCalVal}>{totalFoodCal} kcal</span>
-                                    <span style={styles.goalText}>GOAL: {goalCal} KCAL</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style={styles.goalFooter}>
-                            <div style={styles.footerItem}>
-                                <span style={styles.footerLabel}>DAILY TARGET</span>
-                                <span style={styles.footerValue}>{goalCal} kcal</span>
-                            </div>
-                            <div style={styles.footerDivider} />
-                            <div style={styles.footerItem}>
-                                <span style={styles.footerLabel}>REMAINING</span>
-                                <span style={{ ...styles.footerValue, color: colors.second }}>
-                                    {remaining} kcal
-                                </span>
+            <div style={styles.mainGrid}>
+                {/* Left Column: CALORIE GOAL */}
+                <div style={styles.card}>
+                    <h3 style={styles.cardHeader}>CALORIE GOAL</h3>
+                    <div style={styles.gaugeContainer}>
+                        <div style={styles.gaugeWrapper}>
+                            <Gauge
+                                percentage={percentage}
+                                totalValue={totalFoodCal}
+                                primaryColor={colors.first}
+                                size={265}
+                            />
+                            <div style={styles.gaugeText}>
+                                <span style={styles.totalCalVal}>{totalFoodCal} kcal</span>
+                                <span style={styles.goalText}>GOAL: {goalCal} KCAL</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Right Column: DAILY INTAKE */}
-                    <div style={styles.rightColumn}>
-                        <div style={styles.intakeCard}>
-                            <div style={styles.intakeHeader}>
-                                <h3 style={styles.cardHeader}>DAILY INTAKE</h3>
-                                <span style={styles.itemCount}>
-                                    {Object.keys(formData.food_list || {}).length} ITEMS LOGGED
-                                </span>
-                            </div>
 
-                            <div style={styles.foodList}>
-                                {Object.entries(formData.food_list || {}).map(([food_name, calories]) => (
-                                    <Template
-                                        key={food_name}
-                                        foodName={food_name}
-                                        initialCalories={calories}
-                                        onUpdateCalories={handleUpdateCalories}
-                                        onEditName={handleEditFoodName}
-                                        onDelete={() => handleDeleteFood(food_name)}
-                                    />
-                                ))}
-                            </div>
 
-                            <div style={styles.addArea}>
-                                <input
-                                    style={styles.addInput}
-                                    placeholder="Type food item..."
-                                    value={newFoodName}
-                                    onChange={(e) => setNewFoodName(e.target.value)}
-                                    onKeyDown={handleAddFoodKeyPress}
-                                    disabled={loading}
-                                />
-                                <button
-                                    style={styles.addBtn}
-                                    onClick={() => handleAddFood(newFoodName, 0)}
-                                    disabled={loading}
-                                >
-                                    Add Item
-                                </button>
-                            </div>
+                    <div style={styles.goalFooter}>
+                        <div style={styles.footerItem}>
+                            <span style={styles.footerLabel}>DAILY TARGET</span>
+                            <span style={styles.footerValue}>{goalCal} kcal</span>
+                        </div>
+                        <div style={styles.footerDivider} />
+                        <div style={styles.footerItem}>
+                            <span style={styles.footerLabel}>REMAINING</span>
+                            <span style={{ ...styles.footerValue, color: colors.second }}>
+                                {remaining} kcal
+                            </span>
                         </div>
                     </div>
                 </div>
 
-                {/* Bottom Section: DAILY NOTES */}
-                <div className="diet-notes-wrapper">
-                    <style>{`
-                        .diet-notes-wrapper > div > div {
-                            min-height: 136px !important;
-                        }
-                        .diet-notes-wrapper textarea {
-                            height: 119px !important;
-                        }
-                    `}</style>
-                    <NotesSection
-                        value={formData.notes}
-                        onChange={handleNotesChange}
-                    />
+                {/* Right Column: DAILY INTAKE */}
+                <div style={styles.rightColumn}>
+                    <div style={styles.intakeCard}>
+                        <div style={styles.intakeHeader}>
+                            <h3 style={styles.cardHeader}>DAILY INTAKE</h3>
+                            <span style={styles.itemCount}>
+                                {Object.keys(formData.food_list || {}).length} ITEMS LOGGED
+                            </span>
+                        </div>
+
+                        <div style={styles.foodList}>
+                            {Object.entries(formData.food_list || {}).map(([food_name, calories]) => (
+                                <Template
+                                    key={food_name}
+                                    foodName={food_name}
+                                    initialCalories={calories}
+                                    onUpdateCalories={handleUpdateCalories}
+                                    onEditName={handleEditFoodName}
+                                    onDelete={() => handleDeleteFood(food_name)}
+                                />
+                            ))}
+                        </div>
+
+                        <div style={styles.addArea}>
+                            <input
+                                style={styles.addInput}
+                                placeholder="Type food item..."
+                                value={newFoodName}
+                                onChange={(e) => setNewFoodName(e.target.value)}
+                                onKeyDown={handleAddFoodKeyPress}
+                                disabled={loading}
+                            />
+                            <button
+                                style={styles.addBtn}
+                                onClick={() => handleAddFood(newFoodName, 0)}
+                                disabled={loading}
+                            >
+                                Add Item
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            {/* Bottom Section: DAILY NOTES */}
+            <NotesSection
+                value={formData.notes}
+                onChange={handleNotesChange}
+                minHeight="120px"
+            />
+        </PageLayout>
     );
 }
 
 const styles = {
-    container: {
-        backgroundColor: colors.background,
-        minHeight: '100vh',
-        width: '100vw',
-        boxSizing: 'border-box',
-        color: colors.first,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-    },
-    contentWrapper: {
-        width: '100%',
-        maxWidth: '1080px',
-        padding: '72px 24px 16px 24px',
-        boxSizing: 'border-box',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: spacing.lg,
-    },
     mainGrid: {
         display: 'grid',
         gridTemplateColumns: '1fr 1.25fr',
@@ -341,8 +312,8 @@ const styles = {
     card: {
         backgroundColor: colors.card,
         border: `1px solid ${colors.border}`,
-        borderRadius: '4px',
-        padding: spacing.lg,
+        borderRadius: borderRadius.md,
+        padding: spacing.xl,
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
@@ -357,12 +328,12 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: `${spacing.md} 0`,
+        padding: `${spacing.lg} 0`,
     },
     gaugeWrapper: {
         position: 'relative',
-        width: 276,
-        height: 276,
+        width: 265,
+        height: 265,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -433,8 +404,8 @@ const styles = {
     intakeCard: {
         backgroundColor: colors.card,
         border: `1px solid ${colors.border}`,
-        borderRadius: '4px',
-        padding: spacing.lg,
+        borderRadius: borderRadius.md,
+        padding: spacing.xl,
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
@@ -463,6 +434,7 @@ const styles = {
         marginBottom: spacing.md,
         paddingRight: '4px',
     },
+
     addArea: {
         display: 'flex',
         gap: spacing.sm,
@@ -474,7 +446,7 @@ const styles = {
         backgroundColor: colors.background,
         color: colors.first,
         border: `1px solid ${colors.border}`,
-        borderRadius: '4px',
+        borderRadius: borderRadius.sm,
         padding: '8px 12px',
         fontFamily: typography.fontFamily,
         fontSize: '14px',
@@ -484,7 +456,7 @@ const styles = {
         backgroundColor: colors.first,
         color: colors.background,
         border: 'none',
-        borderRadius: '4px',
+        borderRadius: borderRadius.sm,
         padding: '8px 16px',
         fontFamily: typography.fontFamily,
         fontSize: '14px',

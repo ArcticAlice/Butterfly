@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import PageHeader from '../components/PageHeader';
+import PageLayout from '../components/PageLayout';
 import DateNavigator from '../components/DateNavigator';
 import NotesSection from '../components/NotesSection';
 import Gauge from '../assets/Guage';
-import { colors, typography, spacing } from '../utils/theme';
+import { colors, typography, spacing, borderRadius } from '../utils/theme';
 import { formatTime } from '../utils/helperFunctions';
 
 function SleepPage({ onBack, currentDate, setCurrentDate, service }) {
@@ -182,168 +182,148 @@ function SleepPage({ onBack, currentDate, setCurrentDate, service }) {
     ];
 
     return (
-        <div style={styles.container}>
-            <PageHeader onBack={onBack} />
-            <div style={styles.contentWrapper}>
-                <DateNavigator
-                    currentDate={currentDate}
-                    onPrevious={() =>
-                        setCurrentDate(prev => {
-                            const newDate = new Date(prev);
-                            newDate.setDate(newDate.getDate() - 1);
-                            return newDate;
-                        })
-                    }
-                    onNext={() =>
-                        setCurrentDate(prev => {
-                            const newDate = new Date(prev);
-                            newDate.setDate(newDate.getDate() + 1);
-                            return newDate;
-                        })
-                    }
-                />
+        <PageLayout onBack={onBack}>
+            <DateNavigator
+                currentDate={currentDate}
+                onPrevious={() =>
+                    setCurrentDate(prev => {
+                        const newDate = new Date(prev);
+                        newDate.setDate(newDate.getDate() - 1);
+                        return newDate;
+                    })
+                }
+                onNext={() =>
+                    setCurrentDate(prev => {
+                        const newDate = new Date(prev);
+                        newDate.setDate(newDate.getDate() + 1);
+                        return newDate;
+                    })
+                }
+            />
 
-                <div style={styles.mainGrid}>
-                    {/* Left Column: SLEEP QUALITY */}
-                    <div style={styles.card}>
-                        <h3 style={styles.cardHeader}>SLEEP QUALITY</h3>
-                        <div style={styles.gaugeContainer}>
-                            <div style={styles.gaugeWrapper}>
-                                <Gauge
-                                    percentage={percentage}
-                                    totalValue={totalSleepMins}
-                                    primaryColor={colors.first}
-                                    size={240}
-                                />
-                                <div style={styles.gaugeText}>
-                                    <span style={styles.totalSleepVal}>{formatTime(totalSleepMins)}</span>
-                                    <span style={styles.goalText}>GOAL: 8H 00M</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right Column */}
-                    <div style={styles.rightColumn}>
-                        {/* SLEEP SCHEDULE */}
-                        <div style={styles.card}>
-                            <h3 style={styles.cardHeader}>SLEEP SCHEDULE</h3>
-
-                            <div style={styles.scheduleGrid}>
-                                <div style={styles.scheduleBlock}>
-                                    <label style={styles.subLabel}>Went To Bed</label>
-                                    {editingFields.sleep_start_time ? (
-                                        <input
-                                            type="text"
-                                            ref={(el) => (inputRefs.current.sleep_start_time = el)}
-                                            value={tempValues.sleep_start_time ?? ''}
-                                            onChange={handleTempChange("sleep_start_time")}
-                                            onKeyDown={(e) => handleKeyPress(e, 'sleep_start_time')}
-                                            onBlur={(e) => saveField(e, 'sleep_start_time')}
-                                            style={styles.timeInput}
-                                        />
-                                    ) : (
-                                        <div
-                                            style={styles.timeDisplay}
-                                            onClick={() => startEditing('sleep_start_time')}
-                                            title="Click to edit"
-                                        >
-                                            {formData.sleep_start_time || '00:00 PM'}
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div style={styles.scheduleBlock}>
-                                    <label style={styles.subLabel}>Woke Up</label>
-                                    {editingFields.sleep_end_time ? (
-                                        <input
-                                            type="text"
-                                            ref={(el) => (inputRefs.current.sleep_end_time = el)}
-                                            value={tempValues.sleep_end_time ?? ''}
-                                            onChange={handleTempChange("sleep_end_time")}
-                                            onKeyDown={(e) => handleKeyPress(e, 'sleep_end_time')}
-                                            onBlur={(e) => saveField(e, 'sleep_end_time')}
-                                            style={styles.timeInput}
-                                        />
-                                    ) : (
-                                        <div
-                                            style={styles.timeDisplay}
-                                            onClick={() => startEditing('sleep_end_time')}
-                                            title="Click to edit"
-                                        >
-                                            {formData.sleep_end_time || '00:00 AM'}
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* SLEEP STAGES */}
-                        <div style={styles.card}>
-                            <h3 style={styles.cardHeader}>SLEEP STAGES</h3>
-                            <div style={styles.stagesList}>
-                                {sleepStages.map(({ field, label, color }, idx) => (
-                                    <div
-                                        key={field}
-                                        style={{
-                                            ...styles.stageRow,
-                                            borderBottom: idx === sleepStages.length - 1 ? 'none' : styles.stageRow.borderBottom,
-                                        }}
-                                        onClick={() => !editingFields[field] && startEditing(field)}
-                                        title="Click to edit"
-                                    >
-                                        <div style={{ ...styles.stagePill, backgroundColor: color }} />
-                                        <span style={styles.stageLabel}>{label}</span>
-                                        {editingFields[field] ? (
-                                            <input
-                                                type="text"
-                                                ref={(el) => (inputRefs.current[field] = el)}
-                                                value={tempValues[field] ?? ''}
-                                                onChange={handleTempChange(field)}
-                                                onKeyDown={(e) => handleKeyPress(e, field)}
-                                                onBlur={(e) => saveField(e, field)}
-                                                style={styles.durationInput}
-                                            />
-                                        ) : (
-                                            <span style={styles.stageValue}>{formatTime(formData[field])}</span>
-                                        )}
-                                    </div>
-                                ))}
+            <div style={styles.mainGrid}>
+                {/* Left Column: SLEEP QUALITY */}
+                <div style={styles.card}>
+                    <h3 style={styles.cardHeader}>SLEEP QUALITY</h3>
+                    <div style={styles.gaugeContainer}>
+                        <div style={styles.gaugeWrapper}>
+                            <Gauge
+                                percentage={percentage}
+                                totalValue={totalSleepMins}
+                                primaryColor={colors.first}
+                                size={245}
+                            />
+                            <div style={styles.gaugeText}>
+                                <span style={styles.totalSleepVal}>{formatTime(totalSleepMins)}</span>
+                                <span style={styles.goalText}>GOAL: 8H 00M</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Bottom: DAILY NOTES */}
-                <NotesSection
-                    value={formData.notes}
-                    onChange={handleNotesChange}
-                />
+
+
+                {/* Right Column */}
+                <div style={styles.rightColumn}>
+                    {/* SLEEP SCHEDULE */}
+                    <div style={styles.card}>
+                        <h3 style={styles.cardHeader}>SLEEP SCHEDULE</h3>
+
+                        <div style={styles.scheduleGrid}>
+                            <div style={styles.scheduleBlock}>
+                                <label style={styles.subLabel}>Went To Bed</label>
+                                {editingFields.sleep_start_time ? (
+                                    <input
+                                        type="text"
+                                        ref={(el) => (inputRefs.current.sleep_start_time = el)}
+                                        value={tempValues.sleep_start_time ?? ''}
+                                        onChange={handleTempChange("sleep_start_time")}
+                                        onKeyDown={(e) => handleKeyPress(e, 'sleep_start_time')}
+                                        onBlur={(e) => saveField(e, 'sleep_start_time')}
+                                        style={styles.timeInput}
+                                    />
+                                ) : (
+                                    <div
+                                        style={styles.timeDisplay}
+                                        onClick={() => startEditing('sleep_start_time')}
+                                        title="Click to edit"
+                                    >
+                                        {formData.sleep_start_time || '00:00 PM'}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div style={styles.scheduleBlock}>
+                                <label style={styles.subLabel}>Woke Up</label>
+                                {editingFields.sleep_end_time ? (
+                                    <input
+                                        type="text"
+                                        ref={(el) => (inputRefs.current.sleep_end_time = el)}
+                                        value={tempValues.sleep_end_time ?? ''}
+                                        onChange={handleTempChange("sleep_end_time")}
+                                        onKeyDown={(e) => handleKeyPress(e, 'sleep_end_time')}
+                                        onBlur={(e) => saveField(e, 'sleep_end_time')}
+                                        style={styles.timeInput}
+                                    />
+                                ) : (
+                                    <div
+                                        style={styles.timeDisplay}
+                                        onClick={() => startEditing('sleep_end_time')}
+                                        title="Click to edit"
+                                    >
+                                        {formData.sleep_end_time || '00:00 AM'}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* SLEEP STAGES */}
+                    <div style={styles.card}>
+                        <h3 style={styles.cardHeader}>SLEEP STAGES</h3>
+                        <div style={styles.stagesList}>
+                            {sleepStages.map(({ field, label, color }, idx) => (
+                                <div
+                                    key={field}
+                                    style={{
+                                        ...styles.stageRow,
+                                        borderBottom: idx === sleepStages.length - 1 ? 'none' : styles.stageRow.borderBottom,
+                                    }}
+                                    onClick={() => !editingFields[field] && startEditing(field)}
+                                    title="Click to edit"
+                                >
+                                    <div style={{ ...styles.stagePill, backgroundColor: color }} />
+                                    <span style={styles.stageLabel}>{label}</span>
+                                    {editingFields[field] ? (
+                                        <input
+                                            type="text"
+                                            ref={(el) => (inputRefs.current[field] = el)}
+                                            value={tempValues[field] ?? ''}
+                                            onChange={handleTempChange(field)}
+                                            onKeyDown={(e) => handleKeyPress(e, field)}
+                                            onBlur={(e) => saveField(e, field)}
+                                            style={styles.durationInput}
+                                        />
+                                    ) : (
+                                        <span style={styles.stageValue}>{formatTime(formData[field])}</span>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+
+            {/* Bottom: DAILY NOTES */}
+            <NotesSection
+                value={formData.notes}
+                onChange={handleNotesChange}
+            />
+        </PageLayout>
     );
 }
 
 const styles = {
-    container: {
-        backgroundColor: colors.background,
-        minHeight: '100vh',
-        width: '100vw',
-        boxSizing: 'border-box',
-        color: colors.first,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-    },
-    contentWrapper: {
-        width: '100%',
-        maxWidth: '1080px',
-        padding: '72px 24px 16px 24px',
-        boxSizing: 'border-box',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: spacing.lg,
-    },
     mainGrid: {
         display: 'grid',
         gridTemplateColumns: '1fr 1.25fr',
@@ -353,8 +333,8 @@ const styles = {
     card: {
         backgroundColor: colors.card,
         border: `1px solid ${colors.border}`,
-        borderRadius: '4px',
-        padding: spacing.lg,
+        borderRadius: borderRadius.md,
+        padding: spacing.xl,
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
@@ -369,12 +349,12 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: `${spacing.md} 0`,
+        padding: `${spacing.lg} 0`,
     },
     gaugeWrapper: {
         position: 'relative',
-        width: 240,
-        height: 240,
+        width: 245,
+        height: 245,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -434,7 +414,7 @@ const styles = {
         cursor: 'pointer',
         userSelect: 'none',
         lineHeight: '40px',
-        padding: '2px 0',
+        padding: '3px 0',
         transition: 'opacity 0.15s ease',
     },
     timeInput: {
@@ -444,7 +424,7 @@ const styles = {
         color: colors.first,
         backgroundColor: colors.background,
         border: `1px solid ${colors.border}`,
-        borderRadius: '4px',
+        borderRadius: borderRadius.sm,
         outline: 'none',
         padding: '4px 8px',
         width: '100%',
@@ -457,15 +437,17 @@ const styles = {
     stageRow: {
         display: 'flex',
         alignItems: 'center',
-        padding: '12px 0',
+        padding: '10px 0',
         borderBottom: `1px solid ${colors.border}`,
         cursor: 'pointer',
         userSelect: 'none',
     },
+
+
     stagePill: {
         width: '3px',
         height: '18px',
-        borderRadius: '9999px',
+        borderRadius: borderRadius.full,
         marginRight: spacing.md,
     },
     stageLabel: {
@@ -488,7 +470,7 @@ const styles = {
         color: colors.first,
         backgroundColor: colors.background,
         border: `1px solid ${colors.border}`,
-        borderRadius: '4px',
+        borderRadius: borderRadius.sm,
         outline: 'none',
         padding: '2px 6px',
         width: '70px',

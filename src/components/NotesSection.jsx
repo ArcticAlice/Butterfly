@@ -1,14 +1,21 @@
 import React from 'react';
-import { colors, typography, spacing } from '../utils/theme';
+import { colors, typography, spacing, borderRadius } from '../utils/theme';
 
-function NotesSection({ value, onChange }) {
+function NotesSection({ value, onChange, saveStatus, minHeight = '140px' }) {
     return (
         <div style={styles.card}>
-            <h3 style={styles.header}>DAILY NOTES</h3>
-            <div style={styles.textareaWrapper}>
+            <div style={styles.headerRow}>
+                <h3 style={styles.header}>DAILY NOTES</h3>
+                {saveStatus && (
+                    <span style={styles.statusText}>
+                        {saveStatus === 'saving' ? 'Saving...' : 'Saved'}
+                    </span>
+                )}
+            </div>
+            <div style={{ ...styles.textareaWrapper, minHeight }}>
                 <textarea
                     value={value || ''}
-                    placeholder="Enter Notes"
+                    placeholder="Enter Notes..."
                     style={styles.textarea}
                     onChange={(e) => onChange(e.target.value)}
                 />
@@ -21,37 +28,49 @@ const styles = {
     card: {
         backgroundColor: colors.card,
         border: `1px solid ${colors.border}`,
-        borderRadius: '4px',
+        borderRadius: borderRadius.md,
         padding: spacing.lg,
         boxSizing: 'border-box',
         width: '100%',
         display: 'flex',
         flexDirection: 'column',
-        gap: spacing.md,
+        gap: spacing.sm,
+    },
+    headerRow: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
     },
     header: {
         ...typography.labelCaps,
         color: colors.second,
         margin: 0,
     },
+    statusText: {
+        ...typography.labelCaps,
+        fontSize: '11px',
+        color: colors.second,
+    },
     textareaWrapper: {
         backgroundColor: colors.background,
         border: `1px solid ${colors.border}`,
-        borderRadius: '4px',
+        borderRadius: borderRadius.sm,
         padding: spacing.md,
         boxSizing: 'border-box',
-        minHeight: '160px',
+        display: 'flex',
+        flexDirection: 'column',
     },
     textarea: {
         width: '100%',
-        height: '140px',
+        flex: 1,
+        minHeight: '100px',
         border: 'none',
         outline: 'none',
         fontFamily: typography.fontFamily,
         fontSize: '15px',
         lineHeight: '22px',
         color: colors.first,
-        resize: 'none',
+        resize: 'vertical',
         backgroundColor: 'transparent',
         boxSizing: 'border-box',
     },

@@ -1,95 +1,169 @@
-import PageHeader from "../components/PageHeader"
-import { colors, typography, spacing } from '../utils/theme';
+import React from 'react';
+import PageLayout from "../components/PageLayout";
 import DateNavigator from '../components/DateNavigator';
+import { colors, typography, spacing, borderRadius } from '../utils/theme';
 
 function DashboardPage({ onNavigate, currentDate, setCurrentDate }) {
-
     return (
-        <div style={styles.container}>
-            <PageHeader />
+        <PageLayout title={true}>
+            <DateNavigator
+                currentDate={currentDate}
+                onPrevious={() =>
+                    setCurrentDate(prev => {
+                        const newDate = new Date(prev);
+                        newDate.setDate(newDate.getDate() - 1);
+                        return newDate;
+                    })
+                }
+                onNext={() =>
+                    setCurrentDate(prev => {
+                        const newDate = new Date(prev);
+                        newDate.setDate(newDate.getDate() + 1);
+                        return newDate;
+                    })
+                }
+            />
 
-            <div style={styles.content}>
-                <DateNavigator
-                    currentDate={currentDate}
-                    onPrevious={() =>
-                        setCurrentDate(prev => {
-                            const newDate = new Date(prev);
-                            newDate.setDate(newDate.getDate() - 1);
-                            return newDate;
-                        })
-                    }
-                    onNext={() =>
-                        setCurrentDate(prev => {
-                            const newDate = new Date(prev);
-                            newDate.setDate(newDate.getDate() + 1);
-                            return newDate;
-                        })
-                    }
-                />
-
-                {/* Top Section: Sleep & Small Metrics */}
+            <div style={styles.gridContainer}>
+                {/* Top Section: Sleep & Metrics Column */}
                 <div style={styles.topGrid}>
-
                     {/* Sleep Card */}
-                    <div style={styles.card} onClick={() => onNavigate('sleep')}>
+                    <div
+                        style={{ ...styles.card, ...styles.sleepCard }}
+                        onClick={() => onNavigate('sleep')}
+                        title="View Sleep Details"
+                    >
                         <div style={styles.cardHeader}>
-                            <div>
-                                <p>Sleep</p>
-                            </div>
+                            <span style={styles.cardCategory}>RECOVERY</span>
+                            <h2 style={styles.cardTitle}>Sleep</h2>
                         </div>
+                        <p style={styles.cardSubtext}>Track sleep duration, quality, and stages</p>
                     </div>
 
                     {/* Right Column Metrics */}
                     <div style={styles.metricsColumn}>
-                        <div style={styles.smallCard} onClick={() => onNavigate('vitals')}>
-                            <p>Vitals</p>
+                        <div
+                            style={styles.smallCard}
+                            onClick={() => onNavigate('vitals')}
+                            title="View Vitals Details"
+                        >
+                            <span style={styles.cardCategory}>METRICS</span>
+                            <h3 style={styles.smallCardTitle}>Vitals</h3>
                         </div>
 
-                        <div style={styles.smallCard} onClick={() => onNavigate('diet')}>
-                            <p>Diet</p>
+                        <div
+                            style={styles.smallCard}
+                            onClick={() => onNavigate('diet')}
+                            title="View Diet Details"
+                        >
+                            <span style={styles.cardCategory}>NUTRITION</span>
+                            <h3 style={styles.smallCardTitle}>Diet</h3>
                         </div>
                     </div>
                 </div>
 
                 {/* Bottom Section: Blood Work */}
-                <div style={styles.bloodWorkCard} onClick={() => onNavigate('blood-work')}>
-                    <p>Blood Work</p>
+                <div
+                    style={styles.bloodWorkCard}
+                    onClick={() => onNavigate('blood-work')}
+                    title="View Blood Work Lab Reports"
+                >
+                    <span style={styles.cardCategory}>LABS</span>
+                    <h2 style={styles.cardTitle}>Blood Work</h2>
+                    <p style={styles.cardSubtext}>Biometric analysis and lipid panel records</p>
                 </div>
             </div>
-        </div>
+        </PageLayout>
     );
 }
 
 const styles = {
-    container: {
-        height: '100%',
+    gridContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: spacing.lg,
         width: '100%',
-        boxSizing: 'border-box',
     },
-    content: {
-        width: '70%',
-        height: '93%',
-        position: 'absolute',
-        bottom: '0',
-        left: '50%',
-        transform: 'translateX(-50%)',
+    topGrid: {
         display: 'grid',
-        gridTemplateRows: '5% 50% 36%',
-        gap: '2%',
-        boxSizing: 'border-box',
-        paddingTop: '2%',
+        gridTemplateColumns: '2fr 1fr',
+        gap: spacing.lg,
+        width: '100%',
     },
-
-    topGrid: { display: 'grid', gridTemplateColumns: '2fr 1fr', gap: spacing.lg, marginBottom: spacing.lg },
-
     card: {
-        backgroundColor: colors.card, border: `1px solid ${colors.third}`, borderRadius: spacing.md, padding: spacing.lg, cursor: 'pointer', color: colors.textPrimary, ...typography.h2
+        backgroundColor: colors.card,
+        border: `1px solid ${colors.border}`,
+        borderRadius: borderRadius.md,
+        padding: spacing.lg,
+        cursor: 'pointer',
+        color: colors.first,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        transition: 'border-color 0.2s ease, transform 0.15s ease',
     },
-    cardHeader: { display: 'flex', justifyContent: 'space-between', marginBottom: spacing.lg },
-    metricsColumn: { display: 'flex', flexDirection: 'column', gap: spacing.md },
-    smallCard: { backgroundColor: colors.card, border: `1px solid ${colors.second}`, borderRadius: spacing.md, padding: spacing.md, cursor: 'pointer', flex: '1', color: colors.textPrimary, ...typography.h3 },
+    sleepCard: {
+        minHeight: '242px',
+    },
+    metricsColumn: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: spacing.lg,
+    },
+    smallCard: {
+        backgroundColor: colors.card,
+        border: `1px solid ${colors.border}`,
+        borderRadius: borderRadius.md,
+        padding: spacing.lg,
+        cursor: 'pointer',
+        flex: 1,
+        color: colors.first,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        transition: 'border-color 0.2s ease, transform 0.15s ease',
+    },
+    bloodWorkCard: {
+        backgroundColor: colors.card,
+        border: `1px solid ${colors.border}`,
+        borderRadius: borderRadius.md,
+        padding: spacing.lg,
+        cursor: 'pointer',
+        color: colors.first,
+        minHeight: '152px',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        transition: 'border-color 0.2s ease, transform 0.15s ease',
+    },
 
-    bloodWorkCard: { backgroundColor: colors.card, border: `1px solid ${colors.first}`, borderRadius: spacing.md, padding: spacing.lg, cursor: 'pointer', color: colors.textPrimary, ...typography.h2 },
+
+    cardCategory: {
+        ...typography.labelCaps,
+        fontSize: '11px',
+        color: colors.second,
+        marginBottom: spacing.xs,
+    },
+    cardTitle: {
+        ...typography.h1,
+        color: colors.first,
+        margin: 0,
+    },
+    smallCardTitle: {
+        ...typography.h2,
+        color: colors.first,
+        margin: 0,
+    },
+    cardSubtext: {
+        ...typography.body,
+        fontSize: '14px',
+        color: colors.second,
+        marginTop: spacing.xs,
+    },
+    cardHeader: {
+        display: 'flex',
+        flexDirection: 'column',
+    }
 };
 
 export default DashboardPage;

@@ -5,8 +5,7 @@ import Calendar from '../assets/Calendar.jsx';
 import Settings from '../assets/Settings.jsx';
 
 function PageHeader({ title = false, onBack, showBackButton = true }) {
-
-    const styles = getStyles(title);
+    const isInteractive = Boolean(onBack) && !title;
 
     const handleBackClick = () => {
         if (onBack) {
@@ -16,21 +15,32 @@ function PageHeader({ title = false, onBack, showBackButton = true }) {
 
     return (
         <header style={styles.header}>
-            <div onClick={handleBackClick} style={styles.leftSection}>
+            <div
+                onClick={handleBackClick}
+                style={{
+                    ...styles.leftSection,
+                    cursor: isInteractive ? 'pointer' : 'default',
+                }}
+                title={isInteractive ? "Click to return to Dashboard" : undefined}
+            >
                 <div style={styles.logoContainer}>
                     <Butterfly size="26px" color={colors.first} />
                 </div>
                 <span style={styles.logoText}>Butterfly</span>
             </div>
             <div style={styles.rightSection}>
-                <Calendar size="20px" color={colors.first} stroke="none" />
-                <Settings size="20px" color={colors.first} stroke="none" />
+                <div style={styles.iconButton} title="Calendar">
+                    <Calendar size="20px" color={colors.first} stroke="none" />
+                </div>
+                <div style={styles.iconButton} title="Settings">
+                    <Settings size="20px" color={colors.first} stroke="none" />
+                </div>
             </div>
         </header>
     );
 }
 
-const getStyles = (title) => ({
+const styles = {
     header: {
         display: 'flex',
         alignItems: 'center',
@@ -44,13 +54,13 @@ const getStyles = (title) => ({
         height: '56px',
         padding: `0 ${spacing.lg}`,
         boxSizing: 'border-box',
-        zIndex: 100
+        zIndex: 100,
     },
     leftSection: {
         display: 'flex',
         alignItems: 'center',
         gap: spacing.sm,
-        cursor: title ? 'default' : 'pointer',
+        userSelect: 'none',
     },
     logoContainer: {
         display: 'flex',
@@ -67,8 +77,17 @@ const getStyles = (title) => ({
     rightSection: {
         display: 'flex',
         alignItems: 'center',
-        gap: spacing.md,
+        gap: spacing.sm,
+    },
+    iconButton: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '6px',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        transition: 'opacity 0.15s ease',
     }
-});
+};
 
 export default PageHeader;
