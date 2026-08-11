@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 
 // Import pages
-import AuthPage from './pages/AuthPage';
+// import AuthPage from './pages/AuthPage';
 import DashboardPage from './pages/DashboardPage';
 import SleepPage from './pages/SleepPage';
 import DietPage from './pages/DietPage';
@@ -23,7 +23,7 @@ function App() {
   // 3. Initialize the database once when App mounts
   useEffect(() => {
     let mounted = true;
-    
+
     async function initDatabase() {
       try {
         const s = await getService();
@@ -84,7 +84,7 @@ function App() {
       case 'vitals':
         return <Vitals onBack={navigateBack} currentDate={currentDate} setCurrentDate={setCurrentDate} service={service} />;
       case 'blood-work':
-        return <BloodWorkPage onBack={navigateBack} />;
+        return <BloodWorkPage onBack={navigateBack}/>;
       default:
         return <DashboardPage onNavigate={navigateTo} currentDate={currentDate} setCurrentDate={setCurrentDate} />;
     }
@@ -92,7 +92,7 @@ function App() {
 
   // ========== RETURN STATEMENT ==========
   return (
-      renderPage()
+    renderPage()
   );
 }
 

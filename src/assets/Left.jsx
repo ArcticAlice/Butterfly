@@ -1,16 +1,15 @@
 import {colors} from "../utils/theme"
  
-function Left( {width = "25px", height = "25px", color = colors.second, stroke = "white", strokeWidth = 1, ...props} ) {
+function Left( {size = "25px", color = colors.second, stroke = colors.textPrimary, strokeWidth = 1, ...props} ) {
 
     const style = {
         cursor: "pointer"
     }
-
         return (
         <svg style={style}
             xmlns="http://www.w3.org/2000/svg"
-            width={width}
-            height={height}
+            width={size}
+            height={size}
             viewBox="0 -960 960 960"
             fill={color}
             stroke={stroke}
@@ -22,6 +21,5 @@ function Left( {width = "25px", height = "25px", color = colors.second, stroke =
     );
 
 }
-
 
 export default Left;

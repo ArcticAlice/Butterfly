@@ -1,13 +1,21 @@
 import React from 'react';
-import { colors, typography, spacing } from '../utils/theme';
+import { colors, typography, spacing, borderRadius } from '../utils/theme';
 
-function NotesSection({ value, onChange }) {
+function NotesSection({ value, onChange, saveStatus, minHeight = '140px' }) {
     return (
-        <div style={styles.container}>
-            <div style={styles.textareaWrapper}>
+        <div style={styles.card}>
+            <div style={styles.headerRow}>
+                <h3 style={styles.header}>DAILY NOTES</h3>
+                {saveStatus && (
+                    <span style={styles.statusText}>
+                        {saveStatus === 'saving' ? 'Saving...' : 'Saved'}
+                    </span>
+                )}
+            </div>
+            <div style={{ ...styles.textareaWrapper, minHeight }}>
                 <textarea
-                    value={value}
-                    placeholder="Enter Notes"
+                    value={value || ''}
+                    placeholder="Enter Notes..."
                     style={styles.textarea}
                     onChange={(e) => onChange(e.target.value)}
                 />
@@ -17,16 +25,54 @@ function NotesSection({ value, onChange }) {
 }
 
 const styles = {
-    container: {
-        boxSizing: 'border-box', display: 'grid',
-        gap: '2%', width: '100%', borderRadius: '24px',
+    card: {
+        backgroundColor: colors.card,
+        border: `1px solid ${colors.border}`,
+        borderRadius: borderRadius.md,
+        padding: spacing.lg,
+        boxSizing: 'border-box',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: spacing.sm,
     },
-    textareaWrapper: { position: 'relative', backgroundColor: colors.card, borderRadius: '24px', },
+    headerRow: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    header: {
+        ...typography.labelCaps,
+        color: colors.second,
+        margin: 0,
+    },
+    statusText: {
+        ...typography.labelCaps,
+        fontSize: '11px',
+        color: colors.second,
+    },
+    textareaWrapper: {
+        backgroundColor: colors.background,
+        border: `1px solid ${colors.border}`,
+        borderRadius: borderRadius.sm,
+        padding: spacing.md,
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+    },
     textarea: {
-        width: '100%', border: 'none', outline: 'none',
-        fontSize: '16px', color: colors.first, resize: 'none',
-        padding: '15px', boxSizing: 'border-box', borderRadius: '24px',
-        height: '100%'
+        width: '100%',
+        flex: 1,
+        minHeight: '100px',
+        border: 'none',
+        outline: 'none',
+        fontFamily: typography.fontFamily,
+        fontSize: '15px',
+        lineHeight: '22px',
+        color: colors.first,
+        resize: 'vertical',
+        backgroundColor: 'transparent',
+        boxSizing: 'border-box',
     },
 };
 

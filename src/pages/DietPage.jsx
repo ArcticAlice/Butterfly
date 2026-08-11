@@ -1,11 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import PageHeader from '../components/PageHeader';
+import PageLayout from '../components/PageLayout';
 import DateNavigator from '../components/DateNavigator';
 import NotesSection from '../components/NotesSection';
 import Gauge from '../assets/Guage';
 import Template from '../components/Template';
-import { colors, typography, spacing } from '../utils/theme';
-import { getService } from "../utils/dataFunctions";
+import { colors, typography, spacing, borderRadius } from '../utils/theme';
 
 function DietPage({ onBack, currentDate, setCurrentDate, service }) {
     const [formData, setFormData] = useState({});
@@ -33,7 +32,7 @@ function DietPage({ onBack, currentDate, setCurrentDate, service }) {
         async function initialize() {
             if (!service) return;
             try {
-                setLoading(true)
+                setLoading(true);
 
                 const record = await service.getRecord(currentDate, "food_records_v2");
                 if (!mounted) return;
@@ -60,7 +59,6 @@ function DietPage({ onBack, currentDate, setCurrentDate, service }) {
                     setLoading(false);
                 }
             }
-
         }
         initialize();
 
@@ -81,7 +79,7 @@ function DietPage({ onBack, currentDate, setCurrentDate, service }) {
             if (!hasChanged.current) return;
             try {
                 const updatedData = {
-                    ...formDataRef.current, // safe snapshot for non-notes fields
+                    ...formDataRef.current,
                     notes: notesRef.current
                 };
 
@@ -98,11 +96,10 @@ function DietPage({ onBack, currentDate, setCurrentDate, service }) {
     const saveField = async (data) => {
         try {
             await service.saveRecord(currentDate, data, "food_records_v2");
-            console.log("information saved");
         } catch (error) {
             console.error('Failed to save food record:', error);
         }
-    }
+    };
 
     const handleAddFood = async (food_name, calories) => {
         hasChanged.current = true;
@@ -155,12 +152,12 @@ function DietPage({ onBack, currentDate, setCurrentDate, service }) {
         const updatedFormData = {
             ...formData,
             food_list: updatedFoodList
-        }
+        };
 
-        setFormData(updatedFormData)
+        setFormData(updatedFormData);
 
         if (service) {
-            await saveField(updatedFormData)
+            await saveField(updatedFormData);
         }
     };
 
@@ -169,18 +166,17 @@ function DietPage({ onBack, currentDate, setCurrentDate, service }) {
         const updatedFoodList = {
             ...formData.food_list
         };
-        const calories = updatedFoodList[food_name];
         delete updatedFoodList[food_name];
 
         const updatedFormData = {
             ...formData,
             food_list: updatedFoodList
-        }
+        };
 
-        setFormData(updatedFormData)
+        setFormData(updatedFormData);
 
         if (service) {
-            await saveField(updatedFormData)
+            await saveField(updatedFormData);
         }
     };
 
@@ -197,80 +193,69 @@ function DietPage({ onBack, currentDate, setCurrentDate, service }) {
     };
 
     return (
-        <div style={styles.container}>
-            <PageHeader onBack={onBack} />
+        <PageLayout onBack={onBack}>
+            <DateNavigator
+                currentDate={currentDate}
+                onPrevious={() =>
+                    setCurrentDate(prev => {
+                        const newDate = new Date(prev);
+                        newDate.setDate(newDate.getDate() - 1);
+                        return newDate;
+                    })
+                }
+                onNext={() =>
+                    setCurrentDate(prev => {
+                        const newDate = new Date(prev);
+                        newDate.setDate(newDate.getDate() + 1);
+                        return newDate;
+                    })
+                }
+            />
 
-            <div style={styles.content}>
-
-                <DateNavigator
-                    currentDate={currentDate}
-                    onPrevious={() =>
-                        setCurrentDate(prev => {
-                            const newDate = new Date(prev);
-                            newDate.setDate(newDate.getDate() - 1);
-                            return newDate;
-                        })
-                    }
-                    onNext={() =>
-                        setCurrentDate(prev => {
-                            const newDate = new Date(prev);
-                            newDate.setDate(newDate.getDate() + 1);
-                            return newDate;
-                        })
-                    }
-                />
-                <div style={styles.mainGrid}>
-                    {/* Left Column: Calorie Goal & Macros */}
-                    <div style={styles.leftCol}>
-                        <div style={styles.summaryCard}>
-
-                            <h3 style={styles.cardHeader}>Calorie Goal</h3>
-
-                            <div style={styles.gaugeWrapper}>
-                                <Gauge percentage={percentage} goalText={goalCal.toString()} />
-
-                                <p style={styles.gaugeText}>
-                                    {`${totalFoodCal} \n Calories`}
-                                </p>
-                            </div>
-
-                            <div style={styles.goalFooter}>
-                                <div style={styles.footerItem}>
-                                    <p style={styles.footerLabel}>DAILY TARGET</p>
-                                    <p style={styles.footerValue}>{goalCal} kcal</p>
-                                </div>
-                                <div style={styles.footerDivider} />
-                                <div style={styles.footerItem}>
-                                    <p style={styles.footerLabel}>REMAINING</p>
-                                    <p style={{ ...styles.footerValue, color: colors.third }}>
-                                        {remaining} kcal
-                                    </p>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div style={styles.macroRow}>
-                            <div style={{ ...styles.macroCard, borderTop: `3px solid ${colors.first}` }}>
-                                <span style={styles.macroLabel}>PROTEIN</span>
-                                <span style={styles.macroValue}>?</span>
-                            </div>
-                            <div style={{ ...styles.macroCard, borderTop: `3px solid ${colors.second}` }}>
-                                <span style={styles.macroLabel}>CARBS</span>
-                                <span style={styles.macroValue}>?</span>
-                            </div>
-                            <div style={{ ...styles.macroCard, borderTop: `3px solid ${colors.third}` }}>
-                                <span style={styles.macroLabel}>FAT</span>
-                                <span style={styles.macroValue}>?</span>
+            <div style={styles.mainGrid}>
+                {/* Left Column: CALORIE GOAL */}
+                <div style={styles.card}>
+                    <h3 style={styles.cardHeader}>CALORIE GOAL</h3>
+                    <div style={styles.gaugeContainer}>
+                        <div style={styles.gaugeWrapper}>
+                            <Gauge
+                                percentage={percentage}
+                                totalValue={totalFoodCal}
+                                primaryColor={colors.first}
+                                size={265}
+                            />
+                            <div style={styles.gaugeText}>
+                                <span style={styles.totalCalVal}>{totalFoodCal} kcal</span>
+                                <span style={styles.goalText}>GOAL: {goalCal} KCAL</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Right Column: Daily Intake */}
+
+
+                    <div style={styles.goalFooter}>
+                        <div style={styles.footerItem}>
+                            <span style={styles.footerLabel}>DAILY TARGET</span>
+                            <span style={styles.footerValue}>{goalCal} kcal</span>
+                        </div>
+                        <div style={styles.footerDivider} />
+                        <div style={styles.footerItem}>
+                            <span style={styles.footerLabel}>REMAINING</span>
+                            <span style={{ ...styles.footerValue, color: colors.second }}>
+                                {remaining} kcal
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Column: DAILY INTAKE */}
+                <div style={styles.rightColumn}>
                     <div style={styles.intakeCard}>
                         <div style={styles.intakeHeader}>
-                            <h3 style={styles.cardHeader}>Daily Intake</h3>
-                            <span style={styles.itemCount}>{Object.keys(formData.food_list || {}).length} Items Logged</span>
+                            <h3 style={styles.cardHeader}>DAILY INTAKE</h3>
+                            <span style={styles.itemCount}>
+                                {Object.keys(formData.food_list || {}).length} ITEMS LOGGED
+                            </span>
                         </div>
 
                         <div style={styles.foodList}>
@@ -295,75 +280,60 @@ function DietPage({ onBack, currentDate, setCurrentDate, service }) {
                                 onKeyDown={handleAddFoodKeyPress}
                                 disabled={loading}
                             />
-                            <button 
-                                style={styles.addBtn} 
+                            <button
+                                style={styles.addBtn}
                                 onClick={() => handleAddFood(newFoodName, 0)}
                                 disabled={loading}
                             >
-                                Add
+                                Add Item
                             </button>
                         </div>
                     </div>
                 </div>
-
-                <NotesSection
-                    value={formData.notes}
-                    onChange={handleNotesChange}
-                />
             </div>
-        </div>
+
+            {/* Bottom Section: DAILY NOTES */}
+            <NotesSection
+                value={formData.notes}
+                onChange={handleNotesChange}
+                minHeight="120px"
+            />
+        </PageLayout>
     );
 }
 
 const styles = {
-    container: {
-        height: '100%',
-        width: '100%',
-        boxSizing: 'border-box',
-    },
-    content: {
-        width: '60%',
-        height: '93%',
-        position: 'absolute',
-        bottom: '0',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        display: 'grid',
-        gridTemplateRows: '5% 58% 28%',
-        gap: '2%',
-        boxSizing: 'border-box',
-        paddingTop: '2%',
-    },
     mainGrid: {
         display: 'grid',
-        gridTemplateColumns: '1fr 1.5fr',
-        gap: spacing.xl,
+        gridTemplateColumns: '1fr 1.25fr',
+        gap: spacing.lg,
         width: '100%',
-        minHeight: "0",
     },
-    // Left Column
-    leftCol: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '24px',
-        minHeight: "0",
-        justifyContent: "center",
-    },
-    summaryCard: {
+    card: {
         backgroundColor: colors.card,
-        borderRadius: '24px',
+        border: `1px solid ${colors.border}`,
+        borderRadius: borderRadius.md,
+        padding: spacing.xl,
+        boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
+    },
+    cardHeader: {
+        ...typography.labelCaps,
+        color: colors.second,
+        margin: `0 0 ${spacing.md} 0`,
+    },
+    gaugeContainer: {
+        flex: 1,
+        display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        boxSizing: 'border-box',
-        padding: '32px',
-        minHeight: "0",
+        padding: `${spacing.lg} 0`,
     },
     gaugeWrapper: {
         position: 'relative',
-        width: 220,
-        height: 220,
+        width: 265,
+        height: 265,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -377,56 +347,123 @@ const styles = {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: 1,
         textAlign: 'center',
         pointerEvents: 'none',
+    },
+    totalCalVal: {
+        fontFamily: typography.fontFamily,
+        fontSize: '32px',
+        fontWeight: '300',
+        color: colors.first,
+        lineHeight: '38px',
+    },
+    goalText: {
+        ...typography.labelCaps,
+        color: colors.second,
+        marginTop: '6px',
+        fontSize: '11px',
+    },
+    goalFooter: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-around',
+        paddingTop: spacing.md,
+        marginTop: spacing.md,
+        borderTop: `1px solid ${colors.border}`,
+        width: '100%',
+    },
+    footerItem: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '4px',
+    },
+    footerDivider: {
+        width: '1px',
+        height: '28px',
+        backgroundColor: colors.border,
+    },
+    footerLabel: {
+        ...typography.labelCaps,
+        fontSize: '11px',
+        color: colors.second,
+    },
+    footerValue: {
+        fontFamily: typography.fontFamily,
+        fontSize: '16px',
+        fontWeight: '600',
         color: colors.first,
     },
-    cardHeader: { fontSize: '16px', fontWeight: 'bold', color: colors.first, margin: 0, textAlign: 'left' },
-
-    goalFooter: { display: 'flex', padding: '16px', marginTop: '16px', width: "80%", flexDirection: "row", },
-    footerItem: { flex: 2, display: 'flex', flexDirection: 'column', gap: '4px', justifyContent: "center", alignItems: "center" },
-    footerDivider: { flex: .03, backgroundColor: '#E2E8F0', margin: '0 16px' },
-    footerLabel: { fontSize: '9px', fontWeight: 'bold', color: colors.first },
-    footerValue: { fontSize: '16px', fontWeight: 'bold', color: colors.fifth },
-
-    macroRow: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' },
-    macroCard: { backgroundColor: colors.card, padding: '16px', borderRadius: '12px', textAlign: 'center', },
-    macroLabel: { fontSize: '9px', fontWeight: 'bold', color: colors.first, display: 'block', marginBottom: '8px' },
-    macroValue: { fontSize: '16px', fontWeight: 'bold', color: colors.fifth },
-
-    // Right Column
+    rightColumn: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: spacing.lg,
+        height: '100%',
+    },
     intakeCard: {
         backgroundColor: colors.card,
-        borderRadius: '24px',
-        padding: '32px',
+        border: `1px solid ${colors.border}`,
+        borderRadius: borderRadius.md,
+        padding: spacing.xl,
+        boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
-        minHeight: "0",
+        height: '100%',
+        justifyContent: 'space-between',
     },
-    intakeHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' },
-    itemCount: { fontSize: '12px', color: colors.fifth, },
-
+    intakeHeader: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        margin: `0 0 ${spacing.md} 0`,
+    },
+    itemCount: {
+        ...typography.labelCaps,
+        fontSize: '11px',
+        color: colors.second,
+    },
     foodList: {
-        flex: "1",
+        flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        gap: '20px',
-        overflowY: "auto",
-        minHeight: "0",
+        gap: spacing.sm,
+        minHeight: '140px',
+        maxHeight: '300px',
+        overflowY: 'auto',
+        marginBottom: spacing.md,
+        paddingRight: '4px',
     },
-    foodItem: { display: 'flex', alignItems: 'center', gap: '16px' },
-    foodIconBox: { width: '40px', height: '40px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' },
-    foodInfo: { flex: 1 },
-    foodName: { fontSize: '14px', fontWeight: 'bold', color: colors.first },
-    foodSub: { fontSize: '11px', color: colors.first },
-    foodAction: { display: 'flex', alignItems: 'center', gap: '12px' },
-    foodCal: { fontSize: '14px', color: colors.first },
-    editIcon: { fontSize: '12px', opacity: 0.3, cursor: 'pointer' },
 
-    addArea: { display: 'flex', gap: '12px', borderTop: '1px solid #F1F5F9', paddingTop: '24px' },
-    addInput: { flex: 1, border: `1px solid #F1F5F9`, borderRadius: '10px', padding: '12px 16px', fontSize: '14px', outline: 'none' },
-    addBtn: { backgroundColor: colors.second, color: colors.card, border: 'none', borderRadius: '10px', padding: '0 24px', fontWeight: '600', cursor: 'pointer' }
+    addArea: {
+        display: 'flex',
+        gap: spacing.sm,
+        borderTop: `1px solid ${colors.border}`,
+        paddingTop: spacing.md,
+    },
+    addInput: {
+        flex: 1,
+        backgroundColor: colors.background,
+        color: colors.first,
+        border: `1px solid ${colors.border}`,
+        borderRadius: borderRadius.sm,
+        padding: '8px 12px',
+        fontFamily: typography.fontFamily,
+        fontSize: '14px',
+        outline: 'none',
+    },
+    addBtn: {
+        backgroundColor: colors.first,
+        color: colors.background,
+        border: 'none',
+        borderRadius: borderRadius.sm,
+        padding: '8px 16px',
+        fontFamily: typography.fontFamily,
+        fontSize: '14px',
+        fontWeight: '600',
+        cursor: 'pointer',
+        transition: 'opacity 0.15s ease',
+    },
 };
 
 export default DietPage;
