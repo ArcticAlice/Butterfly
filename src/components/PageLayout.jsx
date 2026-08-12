@@ -2,10 +2,16 @@ import React from 'react';
 import PageHeader from './PageHeader';
 import { colors, spacing } from '../utils/theme';
 
-function PageLayout({ children, onBack, showBackButton = true, title = false, maxWidth = '1080px' }) {
+function PageLayout({ children, onBack, showBackButton = true, title = false, maxWidth = '1080px', onCalendarClick, showCalendarIcon = true }) {
     return (
         <div style={styles.outerContainer}>
-            <PageHeader onBack={onBack} showBackButton={showBackButton} title={title} />
+            <PageHeader
+                onBack={onBack}
+                showBackButton={showBackButton}
+                title={title}
+                onCalendarClick={onCalendarClick}
+                showCalendarIcon={showCalendarIcon}
+            />
             <main style={{ ...styles.contentWrapper, maxWidth }}>
                 {children}
             </main>

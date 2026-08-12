@@ -4,12 +4,18 @@ import Butterfly from '../assets/Butterfly.jsx';
 import Calendar from '../assets/Calendar.jsx';
 import Settings from '../assets/Settings.jsx';
 
-function PageHeader({ title = false, onBack, showBackButton = true }) {
+function PageHeader({ title = false, onBack, showBackButton = true, onCalendarClick, showCalendarIcon = true }) {
     const isInteractive = Boolean(onBack) && !title;
 
     const handleBackClick = () => {
         if (onBack) {
             onBack();
+        }
+    };
+
+    const handleCalendarClick = () => {
+        if (showCalendarIcon && onCalendarClick) {
+            onCalendarClick();
         }
     };
 
@@ -29,7 +35,15 @@ function PageHeader({ title = false, onBack, showBackButton = true }) {
                 <span style={styles.logoText}>Butterfly</span>
             </div>
             <div style={styles.rightSection}>
-                <div style={styles.iconButton} title="Calendar">
+                <div
+                    style={{
+                        ...styles.iconButton,
+                        cursor: showCalendarIcon && onCalendarClick ? 'pointer' : 'not-allowed',
+                        opacity: showCalendarIcon ? 1 : 0.3,
+                    }}
+                    title={showCalendarIcon ? "Calendar" : "Calendar Disabled"}
+                    onClick={handleCalendarClick}
+                >
                     <Calendar size="20px" color={colors.first} stroke="none" />
                 </div>
                 <div style={styles.iconButton} title="Settings">

@@ -47,7 +47,7 @@ function BloodWorkPage({ onBack }) {
     );
 
     return (
-        <PageLayout onBack={onBack}>
+        <PageLayout onBack={onBack} showCalendarIcon={false}>
             {/* Lab Report Navigator */}
             <div style={styles.navigator}>
                 <button

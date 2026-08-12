@@ -8,11 +8,13 @@ import SleepPage from './pages/SleepPage';
 import DietPage from './pages/DietPage';
 import Vitals from './pages/VitalsPage';
 import BloodWorkPage from './pages/BloodWorkPage';
-import { getService } from './utils/dataFunctions'; // 1. Import getService here
+import { getService } from './utils/dataFunctions';
+import CalendarPage from './pages/CalendarPage';
 
 function App() {
   // ========== LOGIC SECTION ==========
   const [currentPage, setCurrentPage] = useState('auth');
+  const [previousPage, setPreviousPage] = useState('dashboard');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
 
@@ -59,6 +61,18 @@ function App() {
     setCurrentPage('dashboard');
   };
 
+  const handleOpenCalendar = () => {
+    if (currentPage !== 'calendar') {
+      setPreviousPage(currentPage === 'auth' ? 'dashboard' : currentPage);
+    }
+    setCurrentPage('calendar');
+  };
+
+  const handleSelectDate = (selectedDate) => {
+    setCurrentDate(selectedDate);
+    setCurrentPage(previousPage || 'dashboard');
+  };
+
   const renderPage = () => {
     // if (!isAuthenticated) {
     //   return <AuthPage onAuthenticate={handleAuthenticate} />;
@@ -76,17 +90,70 @@ function App() {
     // 5. Pass the service as a prop to every page
     switch (currentPage) {
       case 'dashboard':
-        return <DashboardPage onNavigate={navigateTo} currentDate={currentDate} setCurrentDate={setCurrentDate} service={service} />;
+        return (
+          <DashboardPage
+            onNavigate={navigateTo}
+            currentDate={currentDate}
+            setCurrentDate={setCurrentDate}
+            service={service}
+            onCalendarClick={handleOpenCalendar}
+          />
+        );
       case 'sleep':
-        return <SleepPage onBack={navigateBack} currentDate={currentDate} setCurrentDate={setCurrentDate} service={service} />;
+        return (
+          <SleepPage
+            onBack={navigateBack}
+            currentDate={currentDate}
+            setCurrentDate={setCurrentDate}
+            service={service}
+            onCalendarClick={handleOpenCalendar}
+          />
+        );
       case 'diet':
-        return <DietPage onBack={navigateBack} currentDate={currentDate} setCurrentDate={setCurrentDate} service={service} />;
+        return (
+          <DietPage
+            onBack={navigateBack}
+            currentDate={currentDate}
+            setCurrentDate={setCurrentDate}
+            service={service}
+            onCalendarClick={handleOpenCalendar}
+          />
+        );
       case 'vitals':
-        return <Vitals onBack={navigateBack} currentDate={currentDate} setCurrentDate={setCurrentDate} service={service} />;
+        return (
+          <Vitals
+            onBack={navigateBack}
+            currentDate={currentDate}
+            setCurrentDate={setCurrentDate}
+            service={service}
+            onCalendarClick={handleOpenCalendar}
+          />
+        );
       case 'blood-work':
-        return <BloodWorkPage onBack={navigateBack}/>;
+        return (
+          <BloodWorkPage
+            onBack={navigateBack}
+            onCalendarClick={handleOpenCalendar}
+          />
+        );
+      case 'calendar':
+        return (
+          <CalendarPage
+            currentDate={currentDate}
+            onSelectDate={handleSelectDate}
+            onBack={() => setCurrentPage(previousPage || 'dashboard')}
+          />
+        );
       default:
-        return <DashboardPage onNavigate={navigateTo} currentDate={currentDate} setCurrentDate={setCurrentDate} />;
+        return (
+          <DashboardPage
+            onNavigate={navigateTo}
+            currentDate={currentDate}
+            setCurrentDate={setCurrentDate}
+            service={service}
+            onCalendarClick={handleOpenCalendar}
+          />
+        );
     }
   };
 
