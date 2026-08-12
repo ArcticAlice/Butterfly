@@ -52,10 +52,10 @@ const styles = {
         color: colors.second,
     },
     textareaWrapper: {
-        backgroundColor: colors.background,
-        border: `1px solid ${colors.border}`,
-        borderRadius: borderRadius.sm,
-        padding: spacing.md,
+        backgroundColor: colors.card,
+        borderTop: `1px solid ${colors.border}`,
+        paddingTop: spacing.md,
+        // paddingLeft: spacing.sm,
         boxSizing: 'border-box',
         display: 'flex',
         flexDirection: 'column',
@@ -71,7 +71,7 @@ const styles = {
         lineHeight: '22px',
         color: colors.first,
         resize: 'vertical',
-        backgroundColor: 'transparent',
+        backgroundColor: colors.card,
         boxSizing: 'border-box',
     },
 };

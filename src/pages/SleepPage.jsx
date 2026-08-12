@@ -6,7 +6,7 @@ import Gauge from '../assets/Guage';
 import { colors, typography, spacing, borderRadius } from '../utils/theme';
 import { formatTime } from '../utils/helperFunctions';
 
-function SleepPage({ onBack, currentDate, setCurrentDate, service }) {
+function SleepPage({ onBack, currentDate, setCurrentDate, service, onCalendarClick }) {
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({});
     const [editingFields, setEditingFields] = useState({});
@@ -182,7 +182,7 @@ function SleepPage({ onBack, currentDate, setCurrentDate, service }) {
     ];
 
     return (
-        <PageLayout onBack={onBack}>
+        <PageLayout onBack={onBack} onCalendarClick={onCalendarClick}>
             <DateNavigator
                 currentDate={currentDate}
                 onPrevious={() =>

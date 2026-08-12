@@ -3,9 +3,9 @@ import PageLayout from "../components/PageLayout";
 import DateNavigator from '../components/DateNavigator';
 import { colors, typography, spacing, borderRadius } from '../utils/theme';
 
-function DashboardPage({ onNavigate, currentDate, setCurrentDate }) {
+function DashboardPage({ onNavigate, currentDate, setCurrentDate, service, onCalendarClick }) {
     return (
-        <PageLayout title={true}>
+        <PageLayout title={true} onCalendarClick={onCalendarClick}>
             <DateNavigator
                 currentDate={currentDate}
                 onPrevious={() =>

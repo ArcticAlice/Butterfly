@@ -23,7 +23,7 @@ function MetricInput({ label, value, unit, field, changeFunction, saveField, key
     );
 }
 
-function VitalsPage({ onBack, currentDate, setCurrentDate, service }) {
+function VitalsPage({ onBack, currentDate, setCurrentDate, service, onCalendarClick }) {
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({});
     const notesRef = useRef('');
@@ -166,7 +166,7 @@ function VitalsPage({ onBack, currentDate, setCurrentDate, service }) {
     };
 
     return (
-        <PageLayout onBack={onBack}>
+        <PageLayout onBack={onBack} onCalendarClick={onCalendarClick}>
             <DateNavigator
                 currentDate={currentDate}
                 onPrevious={() =>

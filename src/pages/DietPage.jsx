@@ -6,7 +6,7 @@ import Gauge from '../assets/Guage';
 import Template from '../components/Template';
 import { colors, typography, spacing, borderRadius } from '../utils/theme';
 
-function DietPage({ onBack, currentDate, setCurrentDate, service }) {
+function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClick }) {
     const [formData, setFormData] = useState({});
     const [newFoodName, setNewFoodName] = useState('');
     const [loading, setLoading] = useState(true);
@@ -193,7 +193,7 @@ function DietPage({ onBack, currentDate, setCurrentDate, service }) {
     };
 
     return (
-        <PageLayout onBack={onBack}>
+        <PageLayout onBack={onBack} onCalendarClick={onCalendarClick}>
             <DateNavigator
                 currentDate={currentDate}
                 onPrevious={() =>
