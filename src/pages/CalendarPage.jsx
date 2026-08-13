@@ -78,6 +78,8 @@ function CalendarPage({ currentDate = new Date(), onSelectDate, onBack }) {
                             year={currentYear}
                             month={currentMonth}
                             onSelectDay={handleSelectDay}
+                            onPreviousMonth={handleLeftArrow}
+                            onNextMonth={handleRightArrow}
                         />
                     </motion.div>
                 </AnimatePresence>

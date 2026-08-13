@@ -1,8 +1,10 @@
 import React from "react";
 import Block from "./Block";
-import { colors, typography, borderRadius } from "../utils/theme";
+import Left from "../assets/Left.jsx";
+import Right from "../assets/Right.jsx";
+import { colors, typography, spacing, borderRadius } from "../utils/theme";
 
-function CalendarBlock({ year, month, onSelectDay }) {
+function CalendarBlock({ year, month, onSelectDay, onPreviousMonth, onNextMonth }) {
     const firstDay = new Date(year, month, 1);
     const startWeekday = firstDay.getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -32,7 +34,25 @@ function CalendarBlock({ year, month, onSelectDay }) {
     return (
         <div style={styles.box}>
             <div style={styles.headerBox}>
+                <button
+                    type="button"
+                    onClick={onPreviousMonth}
+                    style={styles.arrowButton}
+                    title="Previous Month"
+                >
+                    <Left size="18px" color={colors.first} stroke="none" />
+                </button>
+
                 <h2 style={styles.headerText}>{monthName} {year}</h2>
+
+                <button
+                    type="button"
+                    onClick={onNextMonth}
+                    style={styles.arrowButton}
+                    title="Next Month"
+                >
+                    <Right size="18px" color={colors.first} stroke="none" />
+                </button>
             </div>
 
             <div style={styles.weekdayGrid}>
@@ -67,8 +87,22 @@ const styles = {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        gap: spacing.md,
         paddingBottom: "16px",
         borderBottom: `1px solid ${colors.border}`,
+        userSelect: "none",
+    },
+    arrowButton: {
+        background: 'transparent',
+        border: 'none',
+        padding: '6px',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: '4px',
+        color: colors.first,
+        transition: 'opacity 0.15s ease',
     },
     headerText: {
         fontFamily: typography.fontFamily,
@@ -77,6 +111,8 @@ const styles = {
         color: colors.first,
         margin: 0,
         letterSpacing: "-0.01em",
+        minWidth: "200px",
+        textAlign: "center",
     },
     weekdayGrid: {
         display: "grid",
