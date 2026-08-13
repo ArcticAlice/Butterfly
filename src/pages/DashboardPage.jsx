@@ -62,15 +62,27 @@ function DashboardPage({ onNavigate, currentDate, setCurrentDate, service, onCal
                     </div>
                 </div>
 
-                {/* Bottom Section: Blood Work */}
-                <div
-                    style={styles.bloodWorkCard}
-                    onClick={() => onNavigate('blood-work')}
-                    title="View Blood Work Lab Reports"
-                >
-                    <span style={styles.cardCategory}>LABS</span>
-                    <h2 style={styles.cardTitle}>Blood Work</h2>
-                    <p style={styles.cardSubtext}>Biometric analysis and lipid panel records</p>
+                {/* Bottom Section: Blood Work & Journal */}
+                <div style={styles.bottomGrid}>
+                    <div
+                        style={styles.bloodWorkCard}
+                        onClick={() => onNavigate('blood-work')}
+                        title="View Blood Work Lab Reports"
+                    >
+                        <span style={styles.cardCategory}>LABS</span>
+                        <h2 style={styles.cardTitle}>Blood Work</h2>
+                        <p style={styles.cardSubtext}>Biometric analysis and lipid panel records</p>
+                    </div>
+
+                    <div
+                        style={styles.bloodWorkCard}
+                        onClick={() => onNavigate('journal')}
+                        title="View Journal Tasks & Reflection"
+                    >
+                        <span style={styles.cardCategory}>JOURNAL</span>
+                        <h2 style={styles.cardTitle}>Journal</h2>
+                        <p style={styles.cardSubtext}>Task logging, details, and monthly summary</p>
+                    </div>
                 </div>
             </div>
         </PageLayout>
@@ -87,6 +99,12 @@ const styles = {
     topGrid: {
         display: 'grid',
         gridTemplateColumns: '2fr 1fr',
+        gap: spacing.lg,
+        width: '100%',
+    },
+    bottomGrid: {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
         gap: spacing.lg,
         width: '100%',
     },

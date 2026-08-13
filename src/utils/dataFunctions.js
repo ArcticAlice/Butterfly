@@ -48,6 +48,23 @@ class Service {
             throw error;
         }
     }
+
+    async getRecordsForMonth(year, month, table_name) {
+        try {
+            const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}-%`;
+            const result = await this.db.select(
+                `SELECT date, Info FROM ${table_name} WHERE date LIKE $1`,
+                [monthPrefix]
+            );
+            return result.map(row => ({
+                date: row.date,
+                info: row.Info ? JSON.parse(row.Info) : null
+            }));
+        } catch (error) {
+            console.error(`Failed to get monthly records for ${table_name}`, error);
+            return [];
+        }
+    }
 }
 
 let serviceInstance = null;

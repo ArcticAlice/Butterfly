@@ -8,6 +8,7 @@ import SleepPage from './pages/SleepPage';
 import DietPage from './pages/DietPage';
 import Vitals from './pages/VitalsPage';
 import BloodWorkPage from './pages/BloodWorkPage';
+import JournalPage from './pages/JournalPage';
 import { getService } from './utils/dataFunctions';
 import CalendarPage from './pages/CalendarPage';
 
@@ -133,6 +134,16 @@ function App() {
         return (
           <BloodWorkPage
             onBack={navigateBack}
+            onCalendarClick={handleOpenCalendar}
+          />
+        );
+      case 'journal':
+        return (
+          <JournalPage
+            onBack={navigateBack}
+            currentDate={currentDate}
+            setCurrentDate={setCurrentDate}
+            service={service}
             onCalendarClick={handleOpenCalendar}
           />
         );

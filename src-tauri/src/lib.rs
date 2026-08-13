@@ -38,6 +38,16 @@ pub fn run() {
         );",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 4,
+            description: "create_journal_records_table",
+            sql: "CREATE TABLE IF NOT EXISTS journal_records (
+            Id INTEGER PRIMARY KEY AUTOINCREMENT,
+            Date TEXT NOT NULL UNIQUE,
+            Info TEXT
+        );",
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()

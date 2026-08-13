@@ -3,7 +3,7 @@ import PageLayout from '../components/PageLayout';
 import DateNavigator from '../components/DateNavigator';
 import NotesSection from '../components/NotesSection';
 import Gauge from '../assets/Guage';
-import Template from '../components/Template';
+import FoodTemplate from '../components/FoodTemplate';
 import { colors, typography, spacing, borderRadius } from '../utils/theme';
 
 function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClick }) {
@@ -260,7 +260,7 @@ function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClic
 
                         <div style={styles.foodList}>
                             {Object.entries(formData.food_list || {}).map(([food_name, calories]) => (
-                                <Template
+                                <FoodTemplate
                                     key={food_name}
                                     foodName={food_name}
                                     initialCalories={calories}
