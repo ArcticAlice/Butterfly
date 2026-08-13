@@ -3,6 +3,11 @@ import { formatDateForDB } from './helperFunctions';
 
 const DB_NAME = 'sqlite:butterflyTemp.db';
 
+export function normalizeFoodName(name) {
+    if (!name) return '';
+    return name.toLowerCase().replace(/\s+/g, '');
+}
+
 class Service {
     constructor(db) {
         this.db = db;
@@ -10,6 +15,16 @@ class Service {
     static async create() {
         const db = await Database.load(DB_NAME);
         const instance = new Service(db);
+        try {
+            await db.execute(
+                `CREATE TABLE IF NOT EXISTS unique_foods (
+                    food_name TEXT PRIMARY KEY,
+                    food_calories INTEGER
+                )`
+            );
+        } catch (error) {
+            console.error('Failed to create unique_foods table:', error);
+        }
         return instance;
     }
 
@@ -63,6 +78,52 @@ class Service {
         } catch (error) {
             console.error(`Failed to get monthly records for ${table_name}`, error);
             return [];
+        }
+    }
+
+    async getUniqueFood(rawName) {
+        const normalized = normalizeFoodName(rawName);
+        if (!normalized) return null;
+        try {
+            const result = await this.db.select(
+                `SELECT food_name, food_calories FROM unique_foods WHERE food_name = $1`,
+                [normalized]
+            );
+            if (result && result.length > 0) {
+                return {
+                    food_name: result[0].food_name,
+                    food_calories: Number(result[0].food_calories) || 0
+                };
+            }
+            return null;
+        } catch (error) {
+            console.error('Failed to get unique food:', error);
+            return null;
+        }
+    }
+
+    async saveUniqueFood(rawName, calories) {
+        const normalized = normalizeFoodName(rawName);
+        if (!normalized) return;
+        const cal = Number(calories) || 0;
+        try {
+            const existing = await this.db.select(
+                `SELECT food_name FROM unique_foods WHERE food_name = $1`,
+                [normalized]
+            );
+            if (existing && existing.length > 0) {
+                await this.db.execute(
+                    `UPDATE unique_foods SET food_calories = $1 WHERE food_name = $2`,
+                    [cal, normalized]
+                );
+            } else {
+                await this.db.execute(
+                    `INSERT INTO unique_foods (food_name, food_calories) VALUES ($1, $2)`,
+                    [normalized, cal]
+                );
+            }
+        } catch (error) {
+            console.error('Failed to save unique food:', error);
         }
     }
 }

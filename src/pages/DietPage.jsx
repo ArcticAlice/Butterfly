@@ -5,6 +5,7 @@ import NotesSection from '../components/NotesSection';
 import Gauge from '../assets/Guage';
 import FoodTemplate from '../components/FoodTemplate';
 import { colors, typography, spacing, borderRadius } from '../utils/theme';
+import { normalizeFoodName } from '../utils/dataFunctions';
 
 function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClick }) {
     const [formData, setFormData] = useState({});
@@ -102,16 +103,41 @@ function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClic
     };
 
     const handleAddFood = async (food_name, calories) => {
-        hasChanged.current = true;
         const name = food_name.trim();
+        if (!name) return;
 
-        if (!name || (formData.food_list && name in formData.food_list)) return;
+        const normName = normalizeFoodName(name);
+        const existingList = formData.food_list || {};
+        const isDuplicateToday = Object.keys(existingList).some(
+            k => normalizeFoodName(k) === normName
+        );
+        if (isDuplicateToday) return;
+
+        hasChanged.current = true;
+        let caloriesToUse = Number(calories) || 0;
+
+        if (service) {
+            try {
+                const uniqueFood = await service.getUniqueFood(name);
+                if (uniqueFood) {
+                    if (caloriesToUse === 0) {
+                        caloriesToUse = uniqueFood.food_calories;
+                    } else {
+                        await service.saveUniqueFood(name, caloriesToUse);
+                    }
+                } else {
+                    await service.saveUniqueFood(name, caloriesToUse);
+                }
+            } catch (err) {
+                console.error('Failed to lookup/save unique food:', err);
+            }
+        }
 
         const updatedFormData = {
             ...formData,
             food_list: {
-                ...formData.food_list,
-                [name]: calories
+                ...existingList,
+                [name]: caloriesToUse
             }
         };
 
@@ -125,11 +151,12 @@ function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClic
 
     const handleUpdateCalories = async (food_name, newCalories) => {
         hasChanged.current = true;
+        const cal = Number(newCalories) || 0;
         const updatedFormData = {
             ...formData,
             food_list: {
                 ...formData.food_list,
-                [food_name]: newCalories
+                [food_name]: cal
             }
         };
 
@@ -137,17 +164,21 @@ function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClic
 
         if (service) {
             await saveField(updatedFormData);
+            await service.saveUniqueFood(food_name, cal);
         }
     };
 
     const handleEditFoodName = async (oldName, newName) => {
+        const trimmedNew = newName.trim();
+        if (!trimmedNew || trimmedNew === oldName) return;
+
         hasChanged.current = true;
         const updatedFoodList = {
             ...formData.food_list
         };
-        const calories = updatedFoodList[oldName];
+        const calories = updatedFoodList[oldName] || 0;
         delete updatedFoodList[oldName];
-        updatedFoodList[newName] = calories;
+        updatedFoodList[trimmedNew] = calories;
 
         const updatedFormData = {
             ...formData,
@@ -158,6 +189,7 @@ function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClic
 
         if (service) {
             await saveField(updatedFormData);
+            await service.saveUniqueFood(trimmedNew, calories);
         }
     };
 
