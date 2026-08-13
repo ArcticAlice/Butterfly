@@ -69,3 +69,12 @@ input[type="number"] {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-fourth);
 }
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

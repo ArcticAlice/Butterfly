@@ -20,3 +20,6 @@ export function formatDateForDB(date) {
     const day = String(newDate.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
 }
+export function capitalizeWords(str) {
+    return str.replace(/\b\p{L}/gu, (c) => c.toUpperCase());
+}
