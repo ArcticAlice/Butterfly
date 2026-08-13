@@ -3,7 +3,6 @@ export function formatTime(mins) {
     const m = mins % 60;
     return `${h}h ${m.toString().padStart(2, '0')}m`;
 };
-
 /**
  * Convert JavaScript Date object to YYYY-MM-DD format
  * @param {Date} date - JavaScript Date object
@@ -22,4 +21,8 @@ export function formatDateForDB(date) {
 }
 export function capitalizeWords(str) {
     return str.replace(/\b\p{L}/gu, (c) => c.toUpperCase());
+}
+export function normalizeFoodName(name) {
+    if (!name) return '';
+    return name.toLowerCase().replace(/\s+/g, '');
 }

@@ -5,7 +5,7 @@ import NotesSection from '../components/NotesSection';
 import Gauge from '../assets/Guage';
 import FoodTemplate from '../components/FoodTemplate';
 import { colors, typography, spacing, borderRadius } from '../utils/theme';
-import { normalizeFoodName } from '../utils/dataFunctions';
+import { normalizeFoodName, capitalizeWords } from '../utils/helperFunctions';
 
 function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClick }) {
     const [formData, setFormData] = useState({});
@@ -103,7 +103,7 @@ function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClic
     };
 
     const handleAddFood = async (food_name, calories) => {
-        const name = food_name.trim();
+        const name = capitalizeWords(food_name.trim());
         if (!name) return;
 
         const normName = normalizeFoodName(name);
@@ -169,7 +169,7 @@ function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClic
     };
 
     const handleEditFoodName = async (oldName, newName) => {
-        const trimmedNew = newName.trim();
+        const trimmedNew = capitalizeWords(newName.trim());
         if (!trimmedNew || trimmedNew === oldName) return;
 
         hasChanged.current = true;
