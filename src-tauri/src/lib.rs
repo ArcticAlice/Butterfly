@@ -48,6 +48,15 @@ pub fn run() {
         );",
             kind: MigrationKind::Up,
         },
+        Migration {
+            version: 5,
+            description: "create_unique_foods_table",
+            sql: "CREATE TABLE IF NOT EXISTS unique_foods (
+            food_name TEXT PRIMARY KEY,
+            food_calories INTEGER
+        );",
+            kind: MigrationKind::Up,
+        },
     ];
 
     tauri::Builder::default()
