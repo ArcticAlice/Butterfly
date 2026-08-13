@@ -1,12 +1,7 @@
 import Database from '@tauri-apps/plugin-sql';
-import { formatDateForDB } from './helperFunctions';
+import { formatDateForDB, normalizeFoodName  } from './helperFunctions';
 
-const DB_NAME = 'sqlite:butterflyTemp.db';
-
-export function normalizeFoodName(name) {
-    if (!name) return '';
-    return name.toLowerCase().replace(/\s+/g, '');
-}
+const DB_NAME = 'sqlite:butterfly.db';
 
 class Service {
     constructor(db) {

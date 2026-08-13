@@ -9,6 +9,7 @@ import Summary from "../components/Summary";
 import Plus from "../assets/Plus";
 import Swirl from "../assets/Swirl";
 import { colors, spacing, borderRadius, typography } from "../utils/theme";
+import { capitalizeWords } from "../utils/helperFunctions";
 
 function JournalPage({ onBack, currentDate, setCurrentDate, service, onCalendarClick }) {
     const [pop, changePop] = useState(false);
@@ -69,7 +70,11 @@ function JournalPage({ onBack, currentDate, setCurrentDate, service, onCalendarC
 
     // Handles "add new" from small popup
     const handleCreate = async (newEntry) => {
-        const updated = [...entryList, newEntry];
+        const entryWithCapTitle = {
+            ...newEntry,
+            title: capitalizeWords(newEntry.title || "")
+        };
+        const updated = [...entryList, entryWithCapTitle];
         await saveEntries(updated);
         closePopUp();
     };
@@ -77,8 +82,12 @@ function JournalPage({ onBack, currentDate, setCurrentDate, service, onCalendarC
     // Handles "save edit" from Detail popup
     const handleUpdate = async (updatedEntry) => {
         if (editingIndex === null || editingIndex < 0 || editingIndex >= entryList.length) return;
+        const entryWithCapTitle = {
+            ...updatedEntry,
+            title: capitalizeWords(updatedEntry.title || "")
+        };
         const updated = [...entryList];
-        updated[editingIndex] = updatedEntry;
+        updated[editingIndex] = entryWithCapTitle;
         await saveEntries(updated);
         closeDetailPopUp();
     };
@@ -181,7 +190,7 @@ function JournalPage({ onBack, currentDate, setCurrentDate, service, onCalendarC
                             {entryList.map((entry, index) => (
                                 <JournalTemplate
                                     key={index}
-                                    entry={entry.title}
+                                    entry={capitalizeWords(entry.title || "")}
                                     tag={entry.tag}
                                     onDelete={() => handleDelete(index)}
                                     onEdit={() => handleEdit(index)}
