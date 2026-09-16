@@ -1,7 +1,7 @@
 import Database from '@tauri-apps/plugin-sql';
 import { formatDateForDB, normalizeFoodName, rankFoodMatches } from './helperFunctions';
 
-const DB_NAME = 'sqlite:butterflyg.db';
+const DB_NAME = 'sqlite:butterfly.db';
 
 class Service {
     constructor(db) {
