@@ -1,5 +1,5 @@
 import Database from '@tauri-apps/plugin-sql';
-import { formatDateForDB, normalizeFoodName, rankFoodMatches } from './helperFunctions';
+import { formatDateForDB, normalizeFoodName, rankFoodMatches, capitalizeWords } from './helperFunctions';
 
 const DB_NAME = 'sqlite:butterflyTemp.db';
 
@@ -17,8 +17,9 @@ class Service {
                     food_calories INTEGER
                 )`
             );
+            await instance.migrateUniqueFoodsTable();
         } catch (error) {
-            console.error('Failed to create unique_foods table:', error);
+            console.error('Failed to create/migrate unique_foods table:', error);
         }
         return instance;
     }
@@ -77,17 +78,18 @@ class Service {
     }
 
     async getUniqueFood(rawName) {
-        const normalized = normalizeFoodName(rawName);
-        if (!normalized) return null;
+        if (!rawName) return null;
+        const normTarget = normalizeFoodName(rawName);
+        if (!normTarget) return null;
         try {
-            const result = await this.db.select(
-                `SELECT food_name, food_calories FROM unique_foods WHERE food_name = $1`,
-                [normalized]
+            const allFoods = await this.db.select(
+                `SELECT food_name, food_calories FROM unique_foods`
             );
-            if (result && result.length > 0) {
+            const match = allFoods.find(f => normalizeFoodName(f.food_name) === normTarget);
+            if (match) {
                 return {
-                    food_name: result[0].food_name,
-                    food_calories: Number(result[0].food_calories) || 0
+                    food_name: match.food_name,
+                    food_calories: Number(match.food_calories) || 0
                 };
             }
             return null;
@@ -98,27 +100,104 @@ class Service {
     }
 
     async saveUniqueFood(rawName, calories) {
-        const normalized = normalizeFoodName(rawName);
-        if (!normalized) return;
+        if (!rawName) return;
+        const displayName = capitalizeWords(rawName.trim());
+        const normTarget = normalizeFoodName(displayName);
+        if (!normTarget) return;
         const cal = Number(calories) || 0;
         try {
-            const existing = await this.db.select(
-                `SELECT food_name FROM unique_foods WHERE food_name = $1`,
-                [normalized]
+            const allFoods = await this.db.select(
+                `SELECT food_name FROM unique_foods`
             );
-            if (existing && existing.length > 0) {
+            const existing = allFoods.find(f => normalizeFoodName(f.food_name) === normTarget);
+            if (existing) {
+                if (existing.food_name !== displayName) {
+                    await this.db.execute(`DELETE FROM unique_foods WHERE food_name = $1`, [existing.food_name]);
+                }
                 await this.db.execute(
-                    `UPDATE unique_foods SET food_calories = $1 WHERE food_name = $2`,
-                    [cal, normalized]
+                    `INSERT OR REPLACE INTO unique_foods (food_name, food_calories) VALUES ($1, $2)`,
+                    [displayName, cal]
                 );
             } else {
                 await this.db.execute(
                     `INSERT INTO unique_foods (food_name, food_calories) VALUES ($1, $2)`,
-                    [normalized, cal]
+                    [displayName, cal]
                 );
             }
         } catch (error) {
             console.error('Failed to save unique food:', error);
+        }
+    }
+
+    async migrateUniqueFoodsTable() {
+        try {
+            let foodRecords = [];
+            try {
+                foodRecords = await this.db.select(`SELECT Info FROM food_records_v2`);
+            } catch (err) {}
+
+            const realFoodsMap = new Map();
+            if (foodRecords && foodRecords.length > 0) {
+                for (const row of foodRecords) {
+                    if (!row.Info) continue;
+                    try {
+                        const parsed = JSON.parse(row.Info);
+                        if (parsed && parsed.food_list) {
+                            for (const [name, cals] of Object.entries(parsed.food_list)) {
+                                const trimmed = name.trim();
+                                const norm = normalizeFoodName(trimmed);
+                                if (norm) {
+                                    if (!realFoodsMap.has(norm) || trimmed.includes(' ')) {
+                                        realFoodsMap.set(norm, {
+                                            food_name: capitalizeWords(trimmed),
+                                            food_calories: Number(cals) || 0
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    } catch (e) {}
+                }
+            }
+
+            const existingUnique = await this.db.select(`SELECT food_name, food_calories FROM unique_foods`);
+
+            for (const row of existingUnique) {
+                const norm = normalizeFoodName(row.food_name);
+                if (!norm) continue;
+
+                if (realFoodsMap.has(norm)) {
+                    const real = realFoodsMap.get(norm);
+                    if (row.food_name !== real.food_name) {
+                        await this.db.execute(`DELETE FROM unique_foods WHERE food_name = $1`, [row.food_name]);
+                        await this.db.execute(
+                            `INSERT OR REPLACE INTO unique_foods (food_name, food_calories) VALUES ($1, $2)`,
+                            [real.food_name, real.food_calories || Number(row.food_calories) || 0]
+                        );
+                    }
+                } else if (!row.food_name.includes(' ') && row.food_name === row.food_name.toLowerCase()) {
+                    const formatted = capitalizeWords(row.food_name);
+                    if (formatted !== row.food_name) {
+                        await this.db.execute(`DELETE FROM unique_foods WHERE food_name = $1`, [row.food_name]);
+                        await this.db.execute(
+                            `INSERT OR REPLACE INTO unique_foods (food_name, food_calories) VALUES ($1, $2)`,
+                            [formatted, Number(row.food_calories) || 0]
+                        );
+                    }
+                }
+            }
+
+            for (const [, real] of realFoodsMap.entries()) {
+                const check = await this.db.select(`SELECT food_name FROM unique_foods WHERE food_name = $1`, [real.food_name]);
+                if (!check || check.length === 0) {
+                    await this.db.execute(
+                        `INSERT OR REPLACE INTO unique_foods (food_name, food_calories) VALUES ($1, $2)`,
+                        [real.food_name, real.food_calories]
+                    );
+                }
+            }
+        } catch (error) {
+            console.error('Failed to migrate unique_foods table:', error);
         }
     }
 
@@ -129,7 +208,13 @@ class Service {
                 `SELECT food_name, food_calories FROM unique_foods`
             );
             if (!allFoods || allFoods.length === 0) return [];
-            return rankFoodMatches(rawQuery, allFoods, limit);
+
+            const formattedFoods = allFoods.map(f => ({
+                ...f,
+                food_name: f.food_name ? capitalizeWords(f.food_name.replace(/([a-z])([A-Z])/g, '$1 $2')) : ''
+            }));
+
+            return rankFoodMatches(rawQuery, formattedFoods, limit);
         } catch (error) {
             console.error('Failed to query matching unique foods:', error);
             return [];

@@ -115,11 +115,11 @@ function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClic
                     if (!mounted) return;
                     if (matches && matches.length > 0) {
                         setSuggestions(matches);
-                        setSelectedIndex(0);
+                        setSelectedIndex(-1);
                         setShowDropdown(true);
                     } else {
                         setSuggestions([{ food_name: 'No known food', isFallback: true }]);
-                        setSelectedIndex(0);
+                        setSelectedIndex(-1);
                         setShowDropdown(true);
                     }
                 })
@@ -127,7 +127,7 @@ function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClic
                     console.error('Error fetching matching unique foods:', err);
                     if (!mounted) return;
                     setSuggestions([{ food_name: 'No known food', isFallback: true }]);
-                    setSelectedIndex(0);
+                    setSelectedIndex(-1);
                     setShowDropdown(true);
                 });
         }
@@ -270,12 +270,12 @@ function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClic
         if (showDropdown && suggestions.length > 0) {
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
-                setSelectedIndex(prev => (prev + 1) % suggestions.length);
+                setSelectedIndex(prev => (prev < 0 ? 0 : (prev + 1) % suggestions.length));
                 return;
             }
             if (e.key === 'ArrowUp') {
                 e.preventDefault();
-                setSelectedIndex(prev => (prev - 1 + suggestions.length) % suggestions.length);
+                setSelectedIndex(prev => (prev <= 0 ? suggestions.length - 1 : prev - 1));
                 return;
             }
             if (e.key === 'ArrowRight') {
