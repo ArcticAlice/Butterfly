@@ -11,10 +11,14 @@ function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClic
     const [formData, setFormData] = useState({});
     const [newFoodName, setNewFoodName] = useState('');
     const [loading, setLoading] = useState(true);
+    const [suggestions, setSuggestions] = useState([]);
+    const [selectedIndex, setSelectedIndex] = useState(-1);
+    const [showDropdown, setShowDropdown] = useState(false);
     const notesRef = useRef('');
     const serviceRef = useRef(null);
     const formDataRef = useRef({});
     const hasChanged = useRef(false);
+    const inputContainerRef = useRef(null);
 
     // Calculate total calories dynamically from the Object
     let totalFoodCal = 0;
@@ -93,6 +97,56 @@ function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClic
 
         return () => clearInterval(interval);
     }, [currentDate, service, loading]);
+
+    useEffect(() => {
+        let mounted = true;
+        const trimmed = newFoodName.trim();
+
+        if (!service || trimmed.length < 3) {
+            setSuggestions([]);
+            setShowDropdown(false);
+            setSelectedIndex(-1);
+            return;
+        }
+
+        if (trimmed.length % 3 === 0) {
+            service.getMatchingUniqueFoods(trimmed, 3)
+                .then(matches => {
+                    if (!mounted) return;
+                    if (matches && matches.length > 0) {
+                        setSuggestions(matches);
+                        setSelectedIndex(0);
+                        setShowDropdown(true);
+                    } else {
+                        setSuggestions([{ food_name: 'No known food', isFallback: true }]);
+                        setSelectedIndex(0);
+                        setShowDropdown(true);
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching matching unique foods:', err);
+                    if (!mounted) return;
+                    setSuggestions([{ food_name: 'No known food', isFallback: true }]);
+                    setSelectedIndex(0);
+                    setShowDropdown(true);
+                });
+        }
+        return () => {
+            mounted = false;
+        };
+    }, [newFoodName, service]);
+
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (inputContainerRef.current && !inputContainerRef.current.contains(e.target)) {
+                setShowDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const saveField = async (data) => {
         try {
@@ -213,9 +267,57 @@ function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClic
     };
 
     const handleAddFoodKeyPress = (e) => {
-        if (e.key === 'Enter') {
-            handleAddFood(newFoodName, 0);
+        if (showDropdown && suggestions.length > 0) {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setSelectedIndex(prev => (prev + 1) % suggestions.length);
+                return;
+            }
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setSelectedIndex(prev => (prev - 1 + suggestions.length) % suggestions.length);
+                return;
+            }
+            if (e.key === 'ArrowRight') {
+                if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
+                    const item = suggestions[selectedIndex];
+                    if (!item.isFallback) {
+                        e.preventDefault();
+                        setNewFoodName(item.food_name);
+                        setShowDropdown(false);
+                        return;
+                    }
+                }
+            }
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
+                    const item = suggestions[selectedIndex];
+                    if (!item.isFallback) {
+                        handleAddFood(item.food_name, item.food_calories || 0);
+                        setShowDropdown(false);
+                        return;
+                    }
+                }
+                handleAddFood(newFoodName, 0);
+                setShowDropdown(false);
+                return;
+            }
+            if (e.key === 'Escape') {
+                setShowDropdown(false);
+                return;
+            }
+        } else {
+            if (e.key === 'Enter') {
+                handleAddFood(newFoodName, 0);
+            }
         }
+    };
+
+    const handleSelectSuggestion = (item) => {
+        if (item.isFallback) return;
+        setNewFoodName(item.food_name);
+        setShowDropdown(false);
     };
 
     const handleNotesChange = (value) => {
@@ -290,7 +392,7 @@ function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClic
                             </span>
                         </div>
 
-                        <div style={styles.foodList}>
+                        <div style={styles.foodList} className="no-scrollbar">
                             {Object.entries(formData.food_list || {}).map(([food_name, calories]) => (
                                 <FoodTemplate
                                     key={food_name}
@@ -304,17 +406,64 @@ function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClic
                         </div>
 
                         <div style={styles.addArea}>
-                            <input
-                                style={styles.addInput}
-                                placeholder="Type food item..."
-                                value={newFoodName}
-                                onChange={(e) => setNewFoodName(e.target.value)}
-                                onKeyDown={handleAddFoodKeyPress}
-                                disabled={loading}
-                            />
+                            <div ref={inputContainerRef} style={styles.inputWrapper}>
+                                {showDropdown && suggestions.length > 0 && (
+                                    <div style={styles.dropdownContainer}>
+                                        {suggestions.map((item, idx) => {
+                                            const isSelected = idx === selectedIndex;
+                                            if (item.isFallback) {
+                                                return (
+                                                    <div key="fallback" style={styles.fallbackOption}>
+                                                        No known food
+                                                    </div>
+                                                );
+                                            }
+                                            return (
+                                                <div
+                                                    key={item.food_name + idx}
+                                                    style={{
+                                                        ...styles.dropdownOption,
+                                                        ...(isSelected ? styles.dropdownOptionActive : {})
+                                                    }}
+                                                    onMouseDown={(e) => {
+                                                        e.preventDefault();
+                                                        handleSelectSuggestion(item);
+                                                    }}
+                                                    onMouseEnter={() => setSelectedIndex(idx)}
+                                                >
+                                                    <span>{item.food_name}</span>
+                                                    {item.food_calories ? (
+                                                        <span style={styles.dropdownCal}>{item.food_calories} kcal</span>
+                                                    ) : null}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                                <input
+                                    style={styles.addInput}
+                                    placeholder="Type food item..."
+                                    value={newFoodName}
+                                    onChange={(e) => setNewFoodName(e.target.value)}
+                                    onFocus={() => {
+                                        if (suggestions.length > 0 && newFoodName.trim().length >= 3) {
+                                            setShowDropdown(true);
+                                        }
+                                    }}
+                                    onKeyDown={handleAddFoodKeyPress}
+                                    disabled={loading}
+                                    spellCheck={false}
+                                    autoCorrect="off"
+                                    autoCapitalize="off"
+                                    autoComplete="off"
+                                />
+                            </div>
                             <button
                                 style={styles.addBtn}
-                                onClick={() => handleAddFood(newFoodName, 0)}
+                                onClick={() => {
+                                    handleAddFood(newFoodName, 0);
+                                    setShowDropdown(false);
+                                }}
                                 disabled={loading}
                             >
                                 Add Item
@@ -473,8 +622,58 @@ const styles = {
         borderTop: `1px solid ${colors.border}`,
         paddingTop: spacing.md,
     },
-    addInput: {
+    inputWrapper: {
+        position: 'relative',
         flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+    },
+    dropdownContainer: {
+        position: 'absolute',
+        top: 'calc(100% + 6px)',
+        left: 0,
+        right: 0,
+        backgroundColor: colors.card,
+        border: `1px solid ${colors.border}`,
+        borderRadius: borderRadius.sm,
+        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.6)',
+        zIndex: 100,
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+    },
+    dropdownOption: {
+        padding: '8px 12px',
+        fontFamily: typography.fontFamily,
+        fontSize: '14px',
+        color: colors.first,
+        cursor: 'pointer',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: 'transparent',
+        transition: 'background-color 0.15s ease',
+    },
+    dropdownOptionActive: {
+        backgroundColor: colors.fifth,
+        color: colors.first,
+    },
+    dropdownCal: {
+        fontSize: '12px',
+        color: colors.second,
+        fontFamily: typography.fontFamily,
+    },
+    fallbackOption: {
+        padding: '8px 12px',
+        fontFamily: typography.fontFamily,
+        fontSize: '14px',
+        color: colors.second,
+        fontStyle: 'italic',
+        cursor: 'default',
+    },
+    addInput: {
+        width: '100%',
+        boxSizing: 'border-box',
         backgroundColor: colors.background,
         color: colors.first,
         border: `1px solid ${colors.border}`,

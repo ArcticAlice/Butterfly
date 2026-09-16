@@ -1,5 +1,5 @@
 import Database from '@tauri-apps/plugin-sql';
-import { formatDateForDB, normalizeFoodName  } from './helperFunctions';
+import { formatDateForDB, normalizeFoodName, rankFoodMatches } from './helperFunctions';
 
 const DB_NAME = 'sqlite:butterflyTemp.db';
 
@@ -119,6 +119,20 @@ class Service {
             }
         } catch (error) {
             console.error('Failed to save unique food:', error);
+        }
+    }
+
+    async getMatchingUniqueFoods(rawQuery, limit = 3) {
+        if (!rawQuery) return [];
+        try {
+            const allFoods = await this.db.select(
+                `SELECT food_name, food_calories FROM unique_foods`
+            );
+            if (!allFoods || allFoods.length === 0) return [];
+            return rankFoodMatches(rawQuery, allFoods, limit);
+        } catch (error) {
+            console.error('Failed to query matching unique foods:', error);
+            return [];
         }
     }
 }
