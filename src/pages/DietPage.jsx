@@ -4,6 +4,7 @@ import DateNavigator from '../components/DateNavigator';
 import NotesSection from '../components/NotesSection';
 import Gauge from '../assets/Guage';
 import FoodTemplate from '../components/FoodTemplate';
+import UniqueFoodsPopUp from '../components/UniqueFoodsPopUp';
 import { colors, typography, spacing, borderRadius } from '../utils/theme';
 import { normalizeFoodName, capitalizeWords } from '../utils/helperFunctions';
 
@@ -14,6 +15,9 @@ function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClic
     const [suggestions, setSuggestions] = useState([]);
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const [showDropdown, setShowDropdown] = useState(false);
+    const [showSettingsPopUp, setShowSettingsPopUp] = useState(false);
+    const [uniqueFoodsList, setUniqueFoodsList] = useState([]);
+    const [loadingUniqueFoods, setLoadingUniqueFoods] = useState(false);
     const notesRef = useRef('');
     const serviceRef = useRef(null);
     const formDataRef = useRef({});
@@ -326,8 +330,35 @@ function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClic
         setFormData(prev => ({ ...prev, notes: value }));
     };
 
+    const handleOpenSettings = async () => {
+        setShowSettingsPopUp(true);
+        if (service) {
+            try {
+                setLoadingUniqueFoods(true);
+                const foods = await service.getAllUniqueFoods();
+                setUniqueFoodsList(foods);
+            } catch (e) {
+                console.error('Failed to load unique foods:', e);
+                setUniqueFoodsList([]);
+            } finally {
+                setLoadingUniqueFoods(false);
+            }
+        }
+    };
+
+    const handleDeleteUniqueFood = async (food_name) => {
+        setUniqueFoodsList(prev => prev.filter(f => f.food_name !== food_name));
+        if (service) {
+            try {
+                await service.deleteUniqueFood(food_name);
+            } catch (err) {
+                console.error('Failed to delete unique food:', err);
+            }
+        }
+    };
+
     return (
-        <PageLayout onBack={onBack} onCalendarClick={onCalendarClick}>
+        <PageLayout onBack={onBack} onCalendarClick={onCalendarClick} onSettingsClick={handleOpenSettings}>
             <DateNavigator
                 currentDate={currentDate}
                 onPrevious={() =>
@@ -478,6 +509,15 @@ function DietPage({ onBack, currentDate, setCurrentDate, service, onCalendarClic
                 value={formData.notes}
                 onChange={handleNotesChange}
                 minHeight="120px"
+            />
+
+            {/* Unique Foods Table PopUp */}
+            <UniqueFoodsPopUp
+                show={showSettingsPopUp}
+                onClose={() => setShowSettingsPopUp(false)}
+                foods={uniqueFoodsList}
+                onDelete={handleDeleteUniqueFood}
+                loading={loadingUniqueFoods}
             />
         </PageLayout>
     );

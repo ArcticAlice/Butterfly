@@ -4,7 +4,7 @@ import Butterfly from '../assets/Butterfly.jsx';
 import Calendar from '../assets/Calendar.jsx';
 import Settings from '../assets/Settings.jsx';
 
-function PageHeader({ title = false, onBack, showBackButton = true, onCalendarClick, showCalendarIcon = true }) {
+function PageHeader({ title = false, onBack, showBackButton = true, onCalendarClick, showCalendarIcon = true, onSettingsClick }) {
     const isInteractive = Boolean(onBack) && !title;
 
     const handleBackClick = () => {
@@ -46,7 +46,15 @@ function PageHeader({ title = false, onBack, showBackButton = true, onCalendarCl
                 >
                     <Calendar size="20px" color={colors.first} stroke="none" />
                 </div>
-                <div style={styles.iconButton} title="Settings">
+                <div
+                    style={styles.iconButton}
+                    title="Settings"
+                    onClick={() => {
+                        if (onSettingsClick) {
+                            onSettingsClick();
+                        }
+                    }}
+                >
                     <Settings size="20px" color={colors.first} stroke="none" />
                 </div>
             </div>
