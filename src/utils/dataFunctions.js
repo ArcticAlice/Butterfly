@@ -220,6 +220,35 @@ class Service {
             return [];
         }
     }
+
+    async getAllUniqueFoods() {
+        try {
+            const foods = await this.db.select(
+                `SELECT food_name, food_calories FROM unique_foods ORDER BY food_name COLLATE NOCASE ASC`
+            );
+            return (foods || []).map(f => ({
+                food_name: f.food_name ? capitalizeWords(f.food_name) : '',
+                food_calories: Number(f.food_calories) || 0
+            }));
+        } catch (error) {
+            console.error('Failed to get all unique foods:', error);
+            return [];
+        }
+    }
+
+    async deleteUniqueFood(rawName) {
+        if (!rawName) return false;
+        try {
+            await this.db.execute(
+                `DELETE FROM unique_foods WHERE food_name = $1`,
+                [rawName]
+            );
+            return true;
+        } catch (error) {
+            console.error('Failed to delete unique food:', error);
+            return false;
+        }
+    }
 }
 
 let serviceInstance = null;
