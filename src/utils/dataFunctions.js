@@ -17,9 +17,8 @@ class Service {
                     food_calories INTEGER
                 )`
             );
-            await instance.migrateUniqueFoodsTable();
         } catch (error) {
-            console.error('Failed to create/migrate unique_foods table:', error);
+            console.error('Failed to create unique_foods table:', error);
         }
         return instance;
     }
@@ -240,8 +239,8 @@ class Service {
         if (!rawName) return false;
         try {
             await this.db.execute(
-                `DELETE FROM unique_foods WHERE food_name = $1`,
-                [rawName]
+                `DELETE FROM unique_foods WHERE food_name = $1 COLLATE NOCASE`,
+                [rawName.trim()]
             );
             return true;
         } catch (error) {
